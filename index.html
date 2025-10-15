@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChannelHub - Your Ultimate TV Streaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --secondary: #f5f5f5;
+            --dark: #333;
+            --light: #fff;
+            --gray: #777;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--light);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 5px 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--light);
+            width: 100%;
+            padding: 8px;
+        }
+
+        .search-container input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-container i {
+            color: var(--light);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .player-container {
+            background: var(--light);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .player-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--light);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .player-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .channel-info {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid var(--secondary);
+        }
+
+        .channel-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .channel-details h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .channel-details p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: var(--light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn:hover {
+            background: var(--primary);
+            color: var(--light);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .channels-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .channel-card {
+            background: var(--light);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .channel-card-img {
+            height: 120px;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .channel-card-img img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger);
+            color: var(--light);
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .channel-card-content {
+            padding: 15px;
+        }
+
+        .channel-card-content h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-card-content p {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        footer {
+            background: var(--dark);
+            color: var(--light);
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #ccc;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: var(--light);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-container {
+                width: 100%;
+            }
+
+            .video-container {
+                height: 250px;
+            }
+
+            .channels-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .channel-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .controls {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-tv"></i>
+                <div>
+                    <h1>ChannelHub</h1>
+                    <span>Your Ultimate TV Streaming Platform</span>
+                </div>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search channels...">
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <i class="fas fa-tv"></i>
+                    <span id="totalChannels">Loading...</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-list"></i>
+                    <span id="totalCategories">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="player-container">
+            <div class="video-container">
+                <div class="player-placeholder">
+                    <i class="fas fa-play-circle"></i>
+                    <h3>Select a channel to start streaming</h3>
+                    <p>Browse through our extensive collection of TV channels</p>
+                </div>
+                <video id="videoPlayer" controls style="display: none;">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="channel-info">
+                <div class="channel-logo">
+                    <img id="currentChannelLogo" src="" alt="Channel Logo" style="display: none;">
+                    <i class="fas fa-tv" id="defaultLogoIcon" style="font-size: 1.5rem; color: #ccc;"></i>
+                </div>
+                <div class="channel-details">
+                    <h2 id="currentChannelName">Welcome to ChannelHub</h2>
+                    <p id="currentChannelCategory">Select any channel from the categories below</p>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="playBtn" style="display: none;">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="btn btn-outline" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i> Fullscreen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="categories" id="categoriesContainer">
+            <!-- Categories will be dynamically generated -->
+        </div>
+
+        <div id="featuredChannels" class="channels-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i> Featured Channels
+                </h2>
+                <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="channels-grid" id="featuredChannelsContainer">
+                <!-- Featured channels will be dynamically generated -->
+            </div>
+        </div>
+
+        <div id="allChannels" class="channels-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> All Channels
+                </h2>
+            </div>
+            <div class="channels-grid" id="channelsContainer">
+                <!-- All channels will be dynamically generated -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About ChannelHub</h3>
+                <p>Your ultimate destination for streaming TV channels from around the world. Enjoy a wide variety of content across multiple categories.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Categories</h3>
+                <a href="#">Bangla Entertainment</a>
+                <a href="#">Hindi Movies</a>
+                <a href="#">Sports</a>
+                <a href="#">News</a>
+                <a href="#">Music</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#">Help Center</a>
+                <a href="#">Contact Us</a>
+                <a href="#">FAQ</a>
+                <a href="#">Report Issue</a>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+                <a href="#"><i class="fas fa-globe"></i> Website</a>
+                <a href="#"><i class="fas fa-envelope"></i> Email</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 ChannelHub. All rights reserved. This project is for demonstration purposes only.</p>
+        </div>
+    </footer>
+
+    <!-- Data Loader and Channel Files -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/bangla-channel.js"></script>
+    <script src="js/bangla-music.js"></script>
+    <script src="js/bangla-movies.js"></script>
+    <script src="js/hindi-entertainment.js"></script>
+    <script src="js/hindi-movies.js"></script>
+    <script src="js/hindi-music.js"></script>
+    <script src="js/english-movies.js"></script>
+    <script src="js/english-music.js"></script>
+    <script src="js/kalkata-bangla-channel.js"></script>
+    <script src="js/kalkata-bangla-movies.js"></script>
+    <script src="js/kalkata-bangla-music.js"></script>
+    <script src="js/sony-channel.js"></script>
+    <script src="js/kids-channels.js"></script>
+    <script src="js/news.js"></script>
+    <script src="js/live-sports.js"></script>
+    <script src="js/religious-channel.js"></script>
+    <script src="js/sports-channel.js"></script>
+    <script src="js/zee5-channel.js"></script>
+    <script src="js/burgh-music.js"></script>
+    <script src="js/hudi-orientalmomcaj.js"></script>
+    <script src="js/indar-burgh-mosc.js"></script>
+    <script src="js/hudi-chamel.js"></script>
+    <script src="js/mosic.js"></script>
+    <script src="js/wds-stricis.js"></script>
+    <script src="js/deepset_js.mosic.jp,20231015_aaskd-js.js"></script>
+    <script src="js/hudi-movies.js"></script>
+    <script src="js/information-documentary channel.js"></script>
+    <script src="js/english-movie.js"></script>
+    <script src="js/tablets-burgh-chamel.js"></script>
+    <script src="js/ubique-chamel.js"></script>
+    <script src="js/burgh-dubbed-movie.js"></script>
+    <script src="js/cc-woman-world-cup.js"></script>
+    <script src="js/tablets-burgh-movie.js"></script>
+    <script src="js/lue-spotsi.js"></script>
+    <script src="js/my-chamel.js"></script>
+    <script src="js/burgh-movie.js"></script>
+    <script src="js/hudi-dubbed-movie.js"></script>
+    <script src="js/tablets-burgh-music.js"></script>
+    <script src="js/motelemosc.js"></script>
+    <script src="js/new-chamel.js"></script>
+    <script src="js/burgh-chamel.js"></script>
+    <script src="js/deepset_js.mosic.jp,20231015_detfile.js"></script>
+    <script src="js/deepset_js.mosic.jp,20231015_ba207c.html.js"></script>
+
+    <script>
+        // Main Application Script
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const categoriesContainer = document.getElementById('categoriesContainer');
+            const channelsContainer = document.getElementById('channelsContainer');
+            const featuredChannelsContainer = document.getElementById('featuredChannelsContainer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const currentChannelName = document.getElementById('currentChannelName');
+            const currentChannelCategory = document.getElementById('currentChannelCategory');
+            const currentChannelLogo = document.getElementById('currentChannelLogo');
+            const defaultLogoIcon = document.getElementById('defaultLogoIcon');
+            const searchInput = document.getElementById('searchInput');
+            const playBtn = document.getElementById('playBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const totalChannels = document.getElementById('totalChannels');
+            const totalCategories = document.getElementById('totalCategories');
+
+            // State variables
+            let activeCategory = 'ALL';
+            let filteredChannels = [];
+            let currentPlayingChannel = null;
+            let allChannels = [];
+
+            // Initialize the app
+            function init() {
+                // Load channels from all JS files
+                loadAllChannels();
+                
+                // Wait a moment for channels to load, then initialize UI
+                setTimeout(() => {
+                    if (allChannels.length === 0) {
+                        // If no channels loaded, use demo data
+                        loadDemoChannels();
+                    }
+                    updateStats();
+                    renderCategories();
+                    renderFeaturedChannels();
+                    renderChannels();
+                    setupEventListeners();
+                }, 100);
+            }
+
+            // Load channels from all integrated JS files
+            function loadAllChannels() {
+                // This will collect channels from all your JS files
+                // Each of your JS files should add its channels to window.channelData
+                
+                // Check if data loader exists
+                if (window.channelData && window.channelData.channels) {
+                    allChannels = window.channelData.channels;
+                } else {
+                    // Fallback: check individual category arrays
+                    const categoryArrays = [
+                        window.banglaChannels, window.banglaMusicChannels, window.banglaMovieChannels,
+                        window.hindiEntertainmentChannels, window.hindiMovieChannels, window.hindiMusicChannels,
+                        window.englishMovieChannels, window.englishMusicChannels,
+                        window.kolkataBanglaChannels, window.kolkataBanglaMovieChannels, window.kolkataBanglaMusicChannels,
+                        window.sonyChannels, window.kidsChannels, window.newsChannels,
+                        window.liveSportsChannels, window.religiousChannels, window.sportsChannels,
+                        window.zee5Channels
+                    ];
+                    
+                    categoryArrays.forEach(categoryArray => {
+                        if (categoryArray && Array.isArray(categoryArray)) {
+                            allChannels = allChannels.concat(categoryArray);
+                        }
+                    });
+                }
+                
+                filteredChannels = [...allChannels];
+            }
+
+            // Demo channels in case JS files don't load
+            function loadDemoChannels() {
+                allChannels = [
+                    {
+                        id: "demo1",
+                        name: "BTV National",
+                        logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/BTV%20National.png",
+                        category: "BANGLA",
+                        url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/1709.m3u8",
+                        featured: true
+                    },
+                    {
+                        id: "demo2",
+                        name: "Star Sports 1 HD",
+                        logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Star%20Sports%201%40.jpeg",
+                        category: "SPORTS",
+                        url: "http://stvlive.net:8080/starsports1/tracks-v1a1/mono.m3u8",
+                        featured: true
+                    },
+                    {
+                        id: "demo3",
+                        name: "Cartoon Network",
+                        logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Cartoon%20Network.png",
+                        category: "KIDS",
+                        url: "https://amg01448-samsungin-cartoonnw-samsungin-1y8kz.amagi.tv/playlist/amg01448-samsungin-cartoonnw-samsungin/cb553d1e786c648b93d43d63d5ef41a4d3246ad3032e90703dff06c231901d468ca2f9d3f537b63619d714af3f5e2f0e0433db18dd6511b6802eea0e6d287f09cfcceb2ada861317b3c60e383ebb281700ab0941d8380220dcec5759d438b0340446b00a230f338fbe51aa7e55978808821d57b189e5a4fd04706ded294fdfd20ffda8bd0c118d2ff9932372a75e26c7199604e6368ff19702cf69b66cc1168caa08baf212e7868bfa2a50c24d1bb2ccf90b774fb3833797c9936876b879294d1f6fb8c9cbfc4a7292524159fafadfbe37b04a80d165c94c3eb5158014a53e8e79a500a3a11ff3e4fbfe4c452babcd5f590aa5e1a98ba87a62f337b5f39bbd091c93944c2a5fa8718f3a353705d56f1c4b0b9a90d86276/82/640x360_1284800/index.m3u8",
+                        featured: true
+                    }
+                ];
+                filteredChannels = [...allChannels];
+            }
+
+            // Update statistics
+            function updateStats() {
+                const categories = new Set(allChannels.map(channel => channel.category));
+                totalChannels.textContent = `${allChannels.length}+ Channels`;
+                totalCategories.textContent = `${categories.size} Categories`;
+            }
+
+            // Render category buttons
+            function renderCategories() {
+                const categories = ['ALL', ...new Set(allChannels.map(channel => channel.category))];
+                
+                categoriesContainer.innerHTML = categories.map(category => {
+                    const icon = getCategoryIcon(category);
+                    return `
+                        <button class="category-btn ${category === 'ALL' ? 'active' : ''}" data-category="${category}">
+                            ${icon} ${category}
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            // Get appropriate icon for each category
+            function getCategoryIcon(category) {
+                const icons = {
+                    'ALL': 'fas fa-globe',
+                    'BANGLA': 'fas fa-tv',
+                    'BANGLA MUSIC': 'fas fa-music',
+                    'BANGLA MOVIES': 'fas fa-film',
+                    'HINDI': 'fas fa-tv',
+                    'HINDI MOVIES': 'fas fa-film',
+                    'HINDI MUSIC': 'fas fa-music',
+                    'ENGLISH MOVIES': 'fas fa-film',
+                    'ENGLISH MUSIC': 'fas fa-music',
+                    'KOLKATA BANGLA': 'fas fa-tv',
+                    'KOLKATA BANGLA MOVIES': 'fas fa-film',
+                    'KOLKATA BANGLA MUSIC': 'fas fa-music',
+                    'SONY NETWORK': 'fas fa-satellite',
+                    'KIDS': 'fas fa-child',
+                    'NEWS': 'fas fa-newspaper',
+                    'LIVE SPORTS': 'fas fa-running',
+                    'RELIGIOUS': 'fas fa-pray',
+                    'SPORTS': 'fas fa-baseball-ball',
+                    'ZEE5': 'fas fa-play-circle'
+                };
+                
+                return `<i class="${icons[category] || 'fas fa-tv'}"></i>`;
+            }
+
+            // Render featured channels
+            function renderFeaturedChannels() {
+                const featuredChannels = allChannels.filter(channel => channel.featured);
+                
+                if (featuredChannels.length === 0) {
+                    // If no featured channels, show first 6 channels
+                    const displayChannels = allChannels.slice(0, 6);
+                    featuredChannelsContainer.innerHTML = displayChannels.map(channel => `
+                        <div class="channel-card" data-id="${channel.id}">
+                            <div class="channel-card-img">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <span class="live-badge">LIVE</span>
+                            </div>
+                            <div class="channel-card-content">
+                                <h3>${channel.name}</h3>
+                                <p>${channel.category}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    featuredChannelsContainer.innerHTML = featuredChannels.map(channel => `
+                        <div class="channel-card" data-id="${channel.id}">
+                            <div class="channel-card-img">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <span class="live-badge">FEATURED</span>
+                            </div>
+                            <div class="channel-card-content">
+                                <h3>${channel.name}</h3>
+                                <p>${channel.category}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Render channels based on active category and search
+            function renderChannels() {
+                if (filteredChannels.length === 0) {
+                    channelsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-tv"></i>
+                            <h3>No channels found</h3>
+                            <p>Try a different search term or category</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                channelsContainer.innerHTML = filteredChannels.map(channel => `
+                    <div class="channel-card" data-id="${channel.id}">
+                        <div class="channel-card-img">
+                            <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                            ${channel.featured ? '<span class="live-badge">FEATURED</span>' : '<span class="live-badge">LIVE</span>'}
+                        </div>
+                        <div class="channel-card-content">
+                            <h3>${channel.name}</h3>
+                            <p>${channel.category}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Filter channels by category
+            function filterByCategory(category) {
+                activeCategory = category;
+                
+                if (category === 'ALL') {
+                    filteredChannels = [...allChannels];
+                } else {
+                    filteredChannels = allChannels.filter(channel => channel.category === category);
+                }
+                
+                // Apply search filter if there's a search term
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                if (searchTerm) {
+                    filteredChannels = filteredChannels.filter(channel => 
+                        channel.name.toLowerCase().includes(searchTerm) || 
+                        channel.category.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                renderChannels();
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Category filter
+                categoriesContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('category-btn') || e.target.closest('.category-btn')) {
+                        const categoryBtn = e.target.classList.contains('category-btn') ? 
+                            e.target : e.target.closest('.category-btn');
+                        
+                        // Update active category button
+                        document.querySelectorAll('.category-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        categoryBtn.classList.add('active');
+                        
+                        // Filter channels
+                        const category = categoryBtn.dataset.category;
+                        filterByCategory(category);
+                    }
+                });
+                
+                // Channel selection
+                channelsContainer.addEventListener('click', (e) => {
+                    const channelCard = e.target.closest('.channel-card');
+                    if (channelCard) {
+                        const channelId = channelCard.dataset.id;
+                        const channel = allChannels.find(c => c.id === channelId);
+                        
+                        if (channel) {
+                            playChannel(channel);
+                        }
+                    }
+                });
+
+                // Featured channel selection
+                featuredChannelsContainer.addEventListener('click', (e) => {
+                    const channelCard = e.target.closest('.channel-card');
+                    if (channelCard) {
+                        const channelId = channelCard.dataset.id;
+                        const channel = allChannels.find(c => c.id === channelId);
+                        
+                        if (channel) {
+                            playChannel(channel);
+                        }
+                    }
+                });
+                
+                // Search functionality
+                searchInput.addEventListener('input', () => {
+                    const searchTerm = searchInput.value.trim().toLowerCase();
+                    
+                    if (activeCategory === 'ALL') {
+                        filteredChannels = allChannels.filter(channel => 
+                            channel.name.toLowerCase().includes(searchTerm) || 
+                            channel.category.toLowerCase().includes(searchTerm)
+                        );
+                    } else {
+                        filteredChannels = allChannels.filter(channel => 
+                            channel.category === activeCategory && 
+                            (channel.name.toLowerCase().includes(searchTerm) || 
+                             channel.category.toLowerCase().includes(searchTerm))
+                        );
+                    }
+                    
+                    renderChannels();
+                });
+
+                // Play button
+                playBtn.addEventListener('click', () => {
+                    if (currentPlayingChannel) {
+                        playChannel(currentPlayingChannel);
+                    }
+                });
+
+                // Fullscreen button
+                fullscreenBtn.addEventListener('click', () => {
+                    if (videoPlayer.requestFullscreen) {
+                        videoPlayer.requestFullscreen();
+                    } else if (videoPlayer.webkitRequestFullscreen) {
+                        videoPlayer.webkitRequestFullscreen();
+                    } else if (videoPlayer.msRequestFullscreen) {
+                        videoPlayer.msRequestFullscreen();
+                    }
+                });
+            }
+
+            // Play selected channel
+            function playChannel(channel) {
+                currentPlayingChannel = channel;
+                
+                // Update channel info
+                currentChannelName.textContent = channel.name;
+                currentChannelCategory.textContent = channel.category;
+                
+                if (channel.logo) {
+                    currentChannelLogo.src = channel.logo;
+                    currentChannelLogo.style.display = 'block';
+                    defaultLogoIcon.style.display = 'none';
+                } else {
+                    currentChannelLogo.style.display = 'none';
+                    defaultLogoIcon.style.display = 'block';
+                }
+                
+                // Show video player and hide placeholder
+                document.querySelector('.player-placeholder').style.display = 'none';
+                videoPlayer.style.display = 'block';
+                playBtn.style.display = 'flex';
+                
+                // In a real implementation, you would handle different stream formats
+                // For this demo, we'll just show a message for HLS streams
+                if (channel.url && channel.url.includes('.m3u8')) {
+                    // Note: For actual HLS streams, you would need an HLS.js library
+                    // This is a simplified implementation for demonstration
+                    videoPlayer.innerHTML = `
+                        <source src="${channel.url}" type="application/x-mpegURL">
+                        <p>Your browser doesn't support HLS streaming. Try using Chrome or Safari.</p>
+                    `;
+                    videoPlayer.load();
+                    
+                    // Show a message for demo purposes
+                    setTimeout(() => {
+                        if (videoPlayer.readyState < 3) {
+                            videoPlayer.innerHTML = `
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 2rem;">
+                                    <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                                    <h3>Stream Loading</h3>
+                                    <p>In a real implementation, this would load the actual channel stream.</p>
+                                    <p style="font-size: 0.8rem; margin-top: 1rem;">Demo URL: ${channel.url}</p>
+                                </div>
+                            `;
+                        }
+                    }, 2000);
+                } else {
+                    videoPlayer.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h3>Stream Format Not Supported in Demo</h3>
+                            <p>Actual URL: ${channel.url || 'No URL provided'}</p>
+                        </div>
+                    `;
+                }
+                
+                // Scroll to top to show the player
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+</html>
