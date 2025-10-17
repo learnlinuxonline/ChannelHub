@@ -557,32 +557,32 @@
         </div>
     </footer>
 
-    <!-- Data Loader and Channel Files -->
-<script src="js/data-loader.js"></script>
-<script src="js/bangla-channel.js"></script>
-<script src="js/bangla-music.js"></script>
-<script src="js/bangla-movies.js"></script>
-<script src="js/bangla-dubbed-movies.js"></script>
-<script src="js/hindi-entertainment.js"></script>
-<script src="js/hindi-movies.js"></script>
-<script src="js/hindi-music.js"></script>
-<script src="js/hindi-dubbed-movies.js"></script>
-<script src="js/english-movies.js"></script>
-<script src="js/english-music.js"></script>
-<script src="js/kalkata-bangla-channel.js"></script>
-<script src="js/kalkata-bangla-movies.js"></script>
-<script src="js/kalkata-bangla-music.js"></script>
-<script src="js/sony-channel.js"></script>
-<script src="js/kids-channels.js"></script>
-<script src="js/news.js"></script>
-<script src="js/indian-bangla-news.js"></script>
-<script src="js/live-sports.js"></script>
-<script src="js/religious-channel.js"></script>
-<script src="js/sports-channel.js"></script>
-<script src="js/zee5-channel.js"></script>
-<script src="js/icc-woman-world-cup.js"></script>
-<script src="js/information-documentary channel.js"></script>
-<script src="js/movies.js"></script>
+    <!-- Cleaned Script Files - Remove all suspicious files -->
+    <script src="js/data-loader.js"></script>
+    <script src="js/bangla-channel.js"></script>
+    <script src="js/bangla-music.js"></script>
+    <script src="js/bangla-movies.js"></script>
+    <script src="js/bangla-dubbed-movies.js"></script>
+    <script src="js/hindi-entertainment.js"></script>
+    <script src="js/hindi-movies.js"></script>
+    <script src="js/hindi-music.js"></script>
+    <script src="js/hindi-dubbed-movies.js"></script>
+    <script src="js/english-movies.js"></script>
+    <script src="js/english-music.js"></script>
+    <script src="js/kalkata-bangla-channel.js"></script>
+    <script src="js/kalkata-bangla-movies.js"></script>
+    <script src="js/kalkata-bangla-music.js"></script>
+    <script src="js/sony-channel.js"></script>
+    <script src="js/kids-channels.js"></script>
+    <script src="js/news.js"></script>
+    <script src="js/indian-bangla-news.js"></script>
+    <script src="js/live-sports.js"></script>
+    <script src="js/religious-channel.js"></script>
+    <script src="js/sports-channel.js"></script>
+    <script src="js/zee5-channel.js"></script>
+    <script src="js/icc-woman-world-cup.js"></script>
+    <script src="js/information-documentary-channel.js"></script>
+    <script src="js/movies.js"></script>
 
     <script>
         // Main Application Script
@@ -629,32 +629,37 @@
 
             // Load channels from all integrated JS files
             function loadAllChannels() {
-                // This will collect channels from all your JS files
-                // Each of your JS files should add its channels to window.channelData
+                // Reset all channels
+                allChannels = [];
                 
-                // Check if data loader exists
-                if (window.channelData && window.channelData.channels) {
+                // Check if data loader exists and has channels
+                if (window.channelData && window.channelData.channels && window.channelData.channels.length > 0) {
                     allChannels = window.channelData.channels;
+                    console.log('Loaded channels from data-loader:', allChannels.length);
                 } else {
                     // Fallback: check individual category arrays
                     const categoryArrays = [
                         window.banglaChannels, window.banglaMusicChannels, window.banglaMovieChannels,
-                        window.hindiEntertainmentChannels, window.hindiMovieChannels, window.hindiMusicChannels,
+                        window.banglaDubbedMovieChannels, window.hindiEntertainmentChannels, 
+                        window.hindiMovieChannels, window.hindiMusicChannels, window.hindiDubbedMovieChannels,
                         window.englishMovieChannels, window.englishMusicChannels,
                         window.kolkataBanglaChannels, window.kolkataBanglaMovieChannels, window.kolkataBanglaMusicChannels,
                         window.sonyChannels, window.kidsChannels, window.newsChannels,
-                        window.liveSportsChannels, window.religiousChannels, window.sportsChannels,
-                        window.zee5Channels
+                        window.indianBanglaNewsChannels, window.liveSportsChannels, 
+                        window.religiousChannels, window.sportsChannels, window.zee5Channels,
+                        window.iccWomensWorldCupChannels
                     ];
                     
-                    categoryArrays.forEach(categoryArray => {
+                    categoryArrays.forEach((categoryArray, index) => {
                         if (categoryArray && Array.isArray(categoryArray)) {
                             allChannels = allChannels.concat(categoryArray);
+                            console.log(`Loaded ${categoryArray.length} channels from category ${index}`);
                         }
                     });
                 }
                 
                 filteredChannels = [...allChannels];
+                console.log('Total channels loaded:', allChannels.length);
             }
 
             // Demo channels in case JS files don't load
@@ -716,9 +721,11 @@
                     'BANGLA': 'fas fa-tv',
                     'BANGLA MUSIC': 'fas fa-music',
                     'BANGLA MOVIES': 'fas fa-film',
+                    'BANGLA DUBBED MOVIES': 'fas fa-film',
                     'HINDI': 'fas fa-tv',
                     'HINDI MOVIES': 'fas fa-film',
                     'HINDI MUSIC': 'fas fa-music',
+                    'HINDI DUBBED MOVIES': 'fas fa-film',
                     'ENGLISH MOVIES': 'fas fa-film',
                     'ENGLISH MUSIC': 'fas fa-music',
                     'KOLKATA BANGLA': 'fas fa-tv',
@@ -727,10 +734,12 @@
                     'SONY NETWORK': 'fas fa-satellite',
                     'KIDS': 'fas fa-child',
                     'NEWS': 'fas fa-newspaper',
+                    'INDIAN BANGLA NEWS': 'fas fa-newspaper',
                     'LIVE SPORTS': 'fas fa-running',
                     'RELIGIOUS': 'fas fa-pray',
                     'SPORTS': 'fas fa-baseball-ball',
-                    'ZEE5': 'fas fa-play-circle'
+                    'ZEE5': 'fas fa-play-circle',
+                    'ICC WOMEN\'S WORLD CUP 2025': 'fas fa-trophy'
                 };
                 
                 return `<i class="${icons[category] || 'fas fa-tv'}"></i>`;
@@ -746,7 +755,7 @@
                     featuredChannelsContainer.innerHTML = displayChannels.map(channel => `
                         <div class="channel-card" data-id="${channel.id}">
                             <div class="channel-card-img">
-                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlRWPC90ZXh0Pjwvc3ZnPg=='">
                                 <span class="live-badge">LIVE</span>
                             </div>
                             <div class="channel-card-content">
@@ -759,7 +768,7 @@
                     featuredChannelsContainer.innerHTML = featuredChannels.map(channel => `
                         <div class="channel-card" data-id="${channel.id}">
                             <div class="channel-card-img">
-                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlRWPC90ZXh0Pjwvc3ZnPg=='">
                                 <span class="live-badge">FEATURED</span>
                             </div>
                             <div class="channel-card-content">
@@ -787,7 +796,7 @@
                 channelsContainer.innerHTML = filteredChannels.map(channel => `
                     <div class="channel-card" data-id="${channel.id}">
                         <div class="channel-card-img">
-                            <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                            <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlRWPC90ZXh0Pjwvc3ZnPg=='">
                             ${channel.featured ? '<span class="live-badge">FEATURED</span>' : '<span class="live-badge">LIVE</span>'}
                         </div>
                         <div class="channel-card-content">
@@ -905,7 +914,7 @@
                 });
             }
 
-            // Play selected channel
+            // Play selected channel - IMPROVED VERSION
             function playChannel(channel) {
                 currentPlayingChannel = channel;
                 
@@ -913,7 +922,7 @@
                 currentChannelName.textContent = channel.name;
                 currentChannelCategory.textContent = channel.category;
                 
-                if (channel.logo) {
+                if (channel.logo && channel.logo.trim() !== '') {
                     currentChannelLogo.src = channel.logo;
                     currentChannelLogo.style.display = 'block';
                     defaultLogoIcon.style.display = 'none';
@@ -927,42 +936,97 @@
                 videoPlayer.style.display = 'block';
                 playBtn.style.display = 'flex';
                 
-                // In a real implementation, you would handle different stream formats
-                // For this demo, we'll just show a message for HLS streams
-                if (channel.url && channel.url.includes('.m3u8')) {
-                    // Note: For actual HLS streams, you would need an HLS.js library
-                    // This is a simplified implementation for demonstration
-                    videoPlayer.innerHTML = `
-                        <source src="${channel.url}" type="application/x-mpegURL">
-                        <p>Your browser doesn't support HLS streaming. Try using Chrome or Safari.</p>
-                    `;
-                    videoPlayer.load();
-                    
-                    // Show a message for demo purposes
-                    setTimeout(() => {
-                        if (videoPlayer.readyState < 3) {
+                // Reset video player
+                videoPlayer.innerHTML = '';
+                videoPlayer.src = '';
+                
+                // Check stream type and handle accordingly
+                if (channel.url && channel.url.trim() !== '') {
+                    if (channel.url.includes('.m3u8')) {
+                        // HLS stream
+                        try {
                             videoPlayer.innerHTML = `
-                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 2rem;">
-                                    <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                                    <h3>Stream Loading</h3>
-                                    <p>In a real implementation, this would load the actual channel stream.</p>
-                                    <p style="font-size: 0.8rem; margin-top: 1rem;">Demo URL: ${channel.url}</p>
-                                </div>
+                                <source src="${channel.url}" type="application/x-mpegURL">
+                                Your browser doesn't support HLS streaming. Try using Chrome or Safari.
                             `;
+                            videoPlayer.load();
+                            
+                            // Add event listeners for video
+                            videoPlayer.addEventListener('loadeddata', function() {
+                                console.log('Video loaded successfully');
+                            });
+                            
+                            videoPlayer.addEventListener('error', function(e) {
+                                console.error('Video error:', e);
+                                showStreamMessage('Error loading stream. The stream may be unavailable or require specific codecs.', channel.url);
+                            });
+                            
+                            // Try to play after loading
+                            const playPromise = videoPlayer.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(error => {
+                                    console.log('Auto-play failed:', error);
+                                    showStreamMessage('Stream loaded. Click play to start.', channel.url);
+                                });
+                            }
+                            
+                        } catch (error) {
+                            console.error('Error setting up HLS stream:', error);
+                            showStreamMessage('Error setting up HLS stream', channel.url);
                         }
-                    }, 2000);
+                    } else if (channel.url.includes('.mp4') || channel.url.includes('.mkv')) {
+                        // Direct video file
+                        try {
+                            videoPlayer.innerHTML = `
+                                <source src="${channel.url}" type="video/mp4">
+                                Your browser doesn't support video playback.
+                            `;
+                            videoPlayer.load();
+                            
+                            videoPlayer.addEventListener('loadeddata', function() {
+                                console.log('MP4 video loaded successfully');
+                            });
+                            
+                            videoPlayer.addEventListener('error', function(e) {
+                                console.error('MP4 video error:', e);
+                                showStreamMessage('Error loading video file. The file may be corrupted or unavailable.', channel.url);
+                            });
+                            
+                            const playPromise = videoPlayer.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(error => {
+                                    console.log('MP4 auto-play failed:', error);
+                                    // User can click play manually
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error setting up MP4 stream:', error);
+                            showStreamMessage('Error setting up video file', channel.url);
+                        }
+                    } else {
+                        // Other stream types or unsupported formats
+                        showStreamMessage('Stream format may not be supported by your browser', channel.url);
+                    }
                 } else {
-                    videoPlayer.innerHTML = `
-                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 2rem;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                            <h3>Stream Format Not Supported in Demo</h3>
-                            <p>Actual URL: ${channel.url || 'No URL provided'}</p>
-                        </div>
-                    `;
+                    showStreamMessage('No stream URL provided for this channel', '');
                 }
                 
                 // Scroll to top to show the player
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Helper function to show stream messages
+            function showStreamMessage(message, url) {
+                videoPlayer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: white; text-align: center; padding: 2rem;">
+                        <i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>${message}</h3>
+                        ${url ? `<p style="font-size: 0.8rem; margin-top: 0.5rem; word-break: break-all;">URL: ${url}</p>` : ''}
+                        <p style="font-size: 0.8rem; margin-top: 1rem; color: #ccc;">
+                            Note: Some streams may require specific codecs, may be geo-restricted, or may not be accessible from your network.
+                        </p>
+                    </div>
+                `;
             }
 
             // Initialize the app
