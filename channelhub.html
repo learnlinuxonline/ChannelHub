@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChannelHub - Your Ultimate TV Streaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Include HLS.js library for HLS stream support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --secondary: #f5f5f5;
+            --dark: #333;
+            --light: #fff;
+            --gray: #777;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--light);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 5px 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--light);
+            width: 100%;
+            padding: 8px;
+        }
+
+        .search-container input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-container i {
+            color: var(--light);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .player-container {
+            background: var(--light);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .video-container {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .player-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--light);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .player-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .channel-info {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid var(--secondary);
+        }
+
+        .channel-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .channel-details h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .channel-details p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--light);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: var(--light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn:hover {
+            background: var(--primary);
+            color: var(--light);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .channels-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .channel-card {
+            background: var(--light);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .channel-card-img {
+            height: 120px;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .channel-card-img img {
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger);
+            color: var(--light);
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .channel-card-content {
+            padding: 15px;
+        }
+
+        .channel-card-content h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-card-content p {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+            grid-column: 1 / -1;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        footer {
+            background: var(--dark);
+            color: var(--light);
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #ccc;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: var(--light);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+
+        .loading-indicator {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+        }
+
+        .loading-indicator i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stream-status {
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-container {
+                width: 100%;
+            }
+
+            .video-container {
+                height: 250px;
+            }
+
+            .channels-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .channel-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .controls {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-tv"></i>
+                <div>
+                    <h1>ChannelHub</h1>
+                    <span>Your Ultimate TV Streaming Platform</span>
+                </div>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search channels...">
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <i class="fas fa-tv"></i>
+                    <span id="totalChannels">Loading...</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-list"></i>
+                    <span id="totalCategories">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="player-container">
+            <div class="video-container">
+                <div class="player-placeholder">
+                    <i class="fas fa-play-circle"></i>
+                    <h3>Select a channel to start streaming</h3>
+                    <p>Browse through our extensive collection of TV channels</p>
+                </div>
+                <video id="videoPlayer" controls style="display: none;">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="loading-indicator" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading stream...</p>
+                </div>
+                <div class="stream-status" id="streamStatus"></div>
+            </div>
+            <div class="channel-info">
+                <div class="channel-logo">
+                    <img id="currentChannelLogo" src="" alt="Channel Logo" style="display: none;">
+                    <i class="fas fa-tv" id="defaultLogoIcon" style="font-size: 1.5rem; color: #ccc;"></i>
+                </div>
+                <div class="channel-details">
+                    <h2 id="currentChannelName">Welcome to ChannelHub</h2>
+                    <p id="currentChannelCategory">Select any channel from the categories below</p>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="playBtn" style="display: none;">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button class="btn btn-outline" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i> Fullscreen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="categories" id="categoriesContainer">
+            <!-- Categories will be dynamically generated -->
+        </div>
+
+        <div id="featuredChannels" class="channels-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i> Featured Channels
+                </h2>
+                <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="channels-grid" id="featuredChannelsContainer">
+                <!-- Featured channels will be dynamically generated -->
+            </div>
+        </div>
+
+        <div id="allChannels" class="channels-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list"></i> All Channels
+                </h2>
+            </div>
+            <div class="channels-grid" id="channelsContainer">
+                <!-- All channels will be dynamically generated -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About ChannelHub</h3>
+                <p>Your ultimate destination for streaming TV channels from around the world. Enjoy a wide variety of content across multiple categories.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Categories</h3>
+                <a href="#">ICC Women's World Cup</a>
+                <a href="#">Live Sports</a>
+                <a href="#">Bangla Entertainment</a>
+                <a href="#">Bangla News</a>
+                <a href="#">Bangla Music</a>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <a href="#">Help Center</a>
+                <a href="#">Contact Us</a>
+                <a href="#">FAQ</a>
+                <a href="#">Report Issue</a>
+            </div>
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <a href="#"><i class="fab fa-github"></i> GitHub</a>
+                <a href="#"><i class="fas fa-globe"></i> Website</a>
+                <a href="#"><i class="fas fa-envelope"></i> Email</a>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 ChannelHub. All rights reserved. This project is for demonstration purposes only.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Main Application Script
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const categoriesContainer = document.getElementById('categoriesContainer');
+            const channelsContainer = document.getElementById('channelsContainer');
+            const featuredChannelsContainer = document.getElementById('featuredChannelsContainer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const currentChannelName = document.getElementById('currentChannelName');
+            const currentChannelCategory = document.getElementById('currentChannelCategory');
+            const currentChannelLogo = document.getElementById('currentChannelLogo');
+            const defaultLogoIcon = document.getElementById('defaultLogoIcon');
+            const searchInput = document.getElementById('searchInput');
+            const playBtn = document.getElementById('playBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const totalChannels = document.getElementById('totalChannels');
+            const totalCategories = document.getElementById('totalCategories');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const streamStatus = document.getElementById('streamStatus');
+
+            // State variables
+            let activeCategory = 'ALL';
+            let filteredChannels = [];
+            let currentPlayingChannel = null;
+            let allChannels = [];
+            let hls = null;
+
+            // Your channel data with all provided channels
+            const channelData = [
+                // ICC Women's World Cup 2025 Channels
+           //     {id: "icc1", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 1, url: "http://147.93.154.65/Bein3/index.m3u8", provider: "BEIN", featured: true},
+          //      {id: "icc2", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 2, url: "http://103.151.60.204/T-Sports/tracks-v1a1/mono.m3u8", provider: "TSPORTS", featured: true},
+         //       {id: "icc3", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 3, url: "http://10.16.100.213:8080/hls/tsports.m3u8", provider: "TSPORTS"},
+        //        {id: "icc4", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 4, url: "https://tvsen7.aynascope.net/tsportshd/tracks-v1a1/mono.ts.m3u8?e=1760250723&token=ba53eb293ef74439136e35eaeab652aa&u=7a511720-17fc-44bc-a9a7-9222de71898c", provider: "TSPORTS"},
+        //        {id: "icc5", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 5, url: "http://y3fqd48g.megatv.fun/iptv/NRLXRWSBWBPLN4/9258/index.m3u8", provider: "MEGATV"},
+       //         {id: "icc6", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 6, url: "https://crichdplaylist.extratvteam.workers.dev/master.m3u8?cid=star1in", provider: "CRICHD"},
+       //         {id: "icc7", name: "ICC Women's World Cup 2025", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV_Z6zFJ-S_-oUzF7K-0cVIpH42ZSfph1I9OQWX3EGGkuLdRHOPaywGo8&sx", category: "ICC Women's World Cup", number: 7, url: "https://fl7.moveonjoy.com/WILLOW_CRICKET/index.m3u8", provider: "MOVEONJOY"},
+
+                // Sports Channels
+  //  {id: "Live Sports", name: "", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/OHjtBJkBcqxnFHJBUu4B/posters/8bb71f14-009c-4a63-aa5b-bdf4de2a8a04.png", category: "Sports", number: 1, url: "https://bongoflixbd.top/test/live.php?id=match-asiacup&e=.m3u8", provider: "TOFFEE", featured: true},
+    {id: "epl1", name: "EPL channel 1", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/JS1AqZgBNnOkwJLWlwg-/posters/08617b27-2af1-4035-bcc3-d054ce42ca4b.png", category: "Sports", number: 2, url: "https://bongoflixbd.top/test/live.php?id=match-1&e=.m3u8", provider: "TOFFEE"},
+    {id: "bfl1", name: "BFL | Live 1", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/HHnAgJkBcqxnFHJBabwO/posters/a2cabad4-ab24-4cd3-80ef-ffd74a016393.png", category: "Sports", number: 3, url: "https://bongoflixbd.top/test/live.php?id=match-11&e=.m3u8", provider: "TOFFEE"},
+    {id: "toffee_sports", name: "Toffee sports", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/d60Vs5UBrjBfS2_RV_YV/posters/3cc5bf1e-5a42-415c-8e0e-7a17a1bb64da.png", category: "Sports", number: 4, url: "https://bongoflixbd.top/test/live.php?id=sports_highlights&e=.m3u8", provider: "TOFFEE"},
+    {id: "psl_highlights", name: "PSL Highlights", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ns04LZYBtpl-Sbt7yKqD/posters/fef0cade-0663-4fc7-afb3-7a0b7469d045.png", category: "Sports", number: 5, url: "https://bongoflixbd.top/test/live.php?id=psl_highlights&e=.m3u8", provider: "TOFFEE"},
+ //   {id: "icc_test", name: "ICC Test Championship Highlights", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/PnZefJcBcqxnFHJBoxca/posters/14699162-6ec8-4a94-a572-2795c6ddd329.png", category: "Sports", number: 6, url: "https://bongoflixbd.top/test/live.php?id=icc_wtc_final&e=.m3u8", provider: "TOFFEE"},
+    {id: "euro_sport", name: "Euro Sport HD", logo: "https://images.toffeelive.com/images/program/4388/logo/240x240/mobile_logo_422191001674119624.png", category: "Sports", number: 7, url: "https://bongoflixbd.top/test/live.php?id=euro_sports_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_ten1", name: "SONY SPORTS TEN 1 HD", logo: "https://images.toffeelive.com/images/program/603/logo/240x240/mobile_logo_237244001666780563.png", category: "Sports", number: 8, url: "https://bongoflixbd.top/test/live.php?id=sony_sports_1_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_ten2", name: "SONY SPORTS TEN 2 HD", logo: "https://images.toffeelive.com/images/program/604/logo/240x240/mobile_logo_093449001666780976.png", category: "Sports", number: 9, url: "https://bongoflixbd.top/test/live.php?id=sony_sports_2_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_ten5", name: "SONY SPORTS TEN 5 HD", logo: "https://images.toffeelive.com/images/program/606/logo/240x240/mobile_logo_689539001672145843.png", category: "Sports", number: 10, url: "https://bongoflixbd.top/test/live.php?id=sony_sports_5_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_ten_cricket", name: "SONY TEN Cricket", logo: "https://images.toffeelive.com/images/program/301891/logo/240x240/mobile_logo_578686001735197654.png", category: "Sports", number: 11, url: "https://bongoflixbd.top/test/live.php?id=&e=ten_cricket.m3u8", provider: "TOFFEE"},
+
+              
+                // Live Sports Channels
+                {id: "sports1", name: "Live Sports", logo: "https://via.placeholder.com/100x60?text=SPORTS", category: "Live Sports", number: 101, url: "https://crichdplaylist.extratvteam.workers.dev/master.m3u8?cid=star1in", provider: "CRICHD", featured: true},
+                {id: "sports2", name: "Live Sports", logo: "https://via.placeholder.com/100x60?text=SPORTS", category: "Live Sports", number: 102, url: "https://yflix.top/fuck/live.php?cid=ten_cricket&chunks=fa813a073ae6c4c56c9bbef87d9fd122e6cc604eb437cf6c6c750b1eeddef94d69422e7b3b366dd51789ec2a316f1baf303b1025cafa9574e4bdaf156be463d54f9bf8212a9f1deba1986d2a8e8f6351867437b403509182685dc9e09ed514bd", provider: "YFLIX"},
+                {id: "sports3", name: "Live Sports", logo: "https://via.placeholder.com/100x60?text=SPORTS", category: "Live Sports", number: 103, url: "https://crichdplaylist.extratvteam.workers.dev/master.m3u8?cid=bbtsp1", provider: "CRICHD"},
+                {id: "sports4", name: "Live Sports", logo: "https://via.placeholder.com/100x60?text=SPORTS", category: "Live Sports", number: 104, url: "https://crichdplaylist.extratvteam.workers.dev/master.m3u8?cid=bbtsp2", provider: "CRICHD"},
+                {id: "sports5", name: "Live Sports", logo: "https://via.placeholder.com/100x60?text=SPORTS", category: "Live Sports", number: 105, url: "https://crichdplaylist.extratvteam.workers.dev/master.m3u8?cid=bbtsp3", provider: "CRICHD"},
+                {id: "sports6", name: "Live Sports", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png", category: "Live Sports", number: 106, url: "https://tvsen7.aynascope.net/tsportshd/tracks-v1a1/mono.ts.m3u8?e=1760792801&token=f9e557d14392cbc73be7f7a47eca96dc&u=5448cf91-5746-4e78-a357-d45dca5c1ab9", provider: "TSPORTS"},
+                {id: "sports7", name: "Live Sports", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png", category: "Live Sports", number: 107, url: "https://tvsen7.aynascope.net/tsportshd/tracks-v1a1/mono.ts.m3u8?e=1760792801&token=f9e557d14392cbc73be7f7a47eca96dc&u=5448cf91-5746-4e78-a357-d45dca5c1ab9", provider: "TSPORTS"},
+                 {id: "sports8", name: "Sony Liv", logo: "https://images.bingemoves.in/1537/1400/e9115e3f2991a3c80dbdba312d7b3655.png", category: "Live Sports", number: 108, url: "https://dai.google.com/ssai/event/VK-ym4BcQd-8x-LWT6BucA/master.m3u8", provider: "Sony Liv"},
+
+                // Bangla Entertainment Channels
+                {id: "bangla1", name: "BTV National", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/BTV%20National.png", category: "Bangla Entertainment", number: 201, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1709/output/1709.m3u8", provider: "GPCDN", featured: true},
+                {id: "bangla2", name: "BTV World", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/BTV%20National.png", category: "Bangla Entertainment", number: 202, url: "http://xtv.ooo:8080/danyear12/am809100/245922", provider: "XTV"},
+                {id: "bangla3", name: "BTV Chattogram", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/BTV%20National.png", category: "Bangla Entertainment", number: 203, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/btvbd-office-sg.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+                {id: "bangla4", name: "BTV News", logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4GdTIOJgWg5_BCr3ZDvEzBOMt6gt0QoybcQ&usqp=CAU", category: "Bangla Entertainment", number: 204, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/btvbd-office-sg.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+                {id: "bangla5", name: "T Sports", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/T%20Sports.png", category: "Bangla Entertainment", number: 205, url: "https://iptvcable.netlify.app/Altogether-007/Tsports.m3u8", provider: "IPTV", featured: true},
+                {id: "bangla6", name: "Gazi TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Gazi%20TV.jpg", category: "Bangla Entertainment", number: 206, url: "http://stvlive.net:8080/gtv/tracks-v1a1/mono.m3u8", provider: "STVLIVE"},
+                {id: "bangla7", name: "ATN Bangla", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/ATN%20Bangla.png", category: "Bangla Entertainment", number: 207, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/index.m3u8", provider: "NCARE"},
+                {id: "bangla8", name: "ATN Bangla UK", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/ATN%20Bangla.png", category: "Bangla Entertainment", number: 208, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/atnbanglauk-off.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla9", name: "Channel I", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Channel%20I.png", category: "Bangla Entertainment", number: 209, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1723/output/1723-audio_113532_eng=113200-video=1692000.m3u8", provider: "NCARE"},
+                {id: "bangla10", name: "Maasranga TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Maasranga%20TV.png", category: "Bangla Entertainment", number: 210, url: "https://mtv.sunplex.live/MAASRANGA-TV/tracks-v1a1/mono.m3u8", provider: "SUNPLEX"},
+                {id: "bangla11", name: "Ekushay TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Ekushey%20TV.png", category: "Bangla Entertainment", number: 211, url: "https://ekusheyserver.com/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8", provider: "EKUSHEY"},
+                {id: "bangla12", name: "NTV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/NTV.png", category: "Bangla Entertainment", number: 212, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/1716.m3u8", provider: "GPCDN"},
+                {id: "bangla13", name: "NTV UK", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/NTV.png", category: "Bangla Entertainment", number: 213, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/ntvuk00332211.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla14", name: "RTV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/RTV.png", category: "Bangla Entertainment", number: 214, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/rtv-sg.stream/playlist.m3u8", provider: "JAGOBD"},
+                {id: "bangla15", name: "SATV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/SATV.png", category: "Bangla Entertainment", number: 215, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/satvoff5666.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla16", name: "Deepto TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Deepto%20TV.jpeg", category: "Bangla Entertainment", number: 216, url: "https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8", provider: "GPCDN"},
+                {id: "bangla17", name: "Mohona TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Mohona%20TV.png", category: "Bangla Entertainment", number: 217, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/Mohona-g.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla18", name: "Desh TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Desh%20TV.png", category: "Bangla Entertainment", number: 218, url: "https://app24.jagobd.com.bd/live-orgin/deshtv.stream/playlist.m3u8", provider: "JAGOBD"},
+                {id: "bangla19", name: "MY TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/My%20TV.svg.png", category: "Bangla Entertainment", number: 219, url: "https://mytvbangla.com/0.m3u8", provider: "JAGOBD"},
+                {id: "bangla20", name: "Asian TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Asian%20Tv.png", category: "Bangla Entertainment", number: 220, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/asian-test-sample-ok-d.stream/playlist.m3u8", provider: "JAGOBD"},
+                {id: "bangla21", name: "Bangla TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Bangla%20TV.png", category: "Bangla Entertainment", number: 221, url: "https://byphdgllyk.gpcdn.net/hls/banglatvbd/index.m3u8", provider: "GPCDN"},
+                {id: "bangla22", name: "Anando TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Anonoda%20Tv.png", category: "Bangla Entertainment", number: 222, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/anandatv.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+                {id: "bangla23", name: "Banglavision", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Banglavision.png", category: "Bangla Entertainment", number: 223, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/banglav000.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla24", name: "Nagorik TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Nagorik%20TV.png", category: "Bangla Entertainment", number: 224, url: "http://stvlive.net:8080/nagorik/index.m3u8", provider: "STVLIVE"},
+                {id: "bangla25", name: "Bijoy TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Bijoy%20TV.png", category: "Bangla Entertainment", number: 225, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/bijoy00.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla26", name: "Boishakhi TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Boishaki%20TV.png", category: "Bangla Entertainment", number: 226, url: "https://boishakhi.sonarbanglatv.com/boishakhi/boishakhitv/index.m3u8", provider: "SONARBANGLATV"},
+                {id: "bangla27", name: "Channel 9", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Channel%209.png", category: "Bangla Entertainment", number: 227, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/channel9hd.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla28", name: "Nexus TV HD", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Nexus%20TV.png", category: "Bangla Entertainment", number: 228, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/nexustv.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla29", name: "Global TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Global%20Television%20Bangladesh.png", category: "Bangla Entertainment", number: 229, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/Global-g.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla30", name: "Green TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Green%20TV.png", category: "Bangla Entertainment", number: 230, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/greentv.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla31", name: "METV", logo: "https://via.placeholder.com/100x60?text=METV", category: "Bangla Entertainment", number: 231, url: "http://stvlive.net:8080/metv/tracks-v1a1/mono.m3u8", provider: "STVLIVE"},
+                {id: "bangla32", name: "Channel S UK HD", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Channel%20S.jpeg", category: "Bangla Entertainment", number: 232, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/chsukoff.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "bangla33", name: "Channel S HD", logo: "https://i.ibb.co/QmPPKgg/20240826-231747.png", category: "Bangla Entertainment", number: 233, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/channels.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+                {id: "bangla34", name: "BONGO DRAMAS", logo: "https://i.ibb.co/4VtHQpf/20240907-023221.png", category: "Bangla Entertainment", number: 234, url: "https://admin.himel-op.top/Join-Telegram-@HimelOP_Official/bongo-op.m3u8?id=bongo-dramas", provider: "HIMELOP"},
+
+                // Bangla News Channels
+                {id: "news1", name: "Somoy TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Somoy%20TV.jpeg", category: "Bangla News", number: 301, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/index.m3u8", provider: "NCARE", featured: true},
+                {id: "news2", name: "Independent TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Independent%20Television.png", category: "Bangla News", number: 302, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/independent-8-org.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "news3", name: "Ekattor TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Ekattor%20TV.png", category: "Bangla News", number: 303, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/ekattor.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "news4", name: "ATN News", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/ATN%20News.png", category: "Bangla News", number: 304, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/atnws-sg.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "news5", name: "Jamuna TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Jamuna%20TV.jpeg", category: "Bangla News", number: 305, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/1701.m3u8", provider: "GPCDN"},
+                {id: "news6", name: "Channel 24", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/channel%2024.png", category: "Bangla News", number: 306, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1703/output/1703.m3u8", provider: "GPCDN"},
+                {id: "news7", name: "News 24", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/News%2024.png", category: "Bangla News", number: 307, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/news24local.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "news8", name: "DBC News", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/DBC%20News.png", category: "Bangla News", number: 308, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/dbcnews.stream/tracks-v1a1/playlist.m3u8", provider: "JAGOBD"},
+                {id: "news9", name: "Ekhone TV", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Ekhon%20TV.png", category: "Bangla News", number: 309, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/globaltv.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "news10", name: "TBN 24 USA", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/TBN24.png", category: "Bangla News", number: 310, url: "https://dog.dg21bd.com/TBN24WEBUSA/index.m3u8", provider: "DG21BD"},
+
+                // Bangla Music Channels
+                {id: "music1", name: "Gaan Bangla", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/Gaan%20Bangla.png", category: "Bangla Music", number: 401, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/gaanbangla-8-orgd.stream/playlist.m3u8", provider: "NCARE", featured: true},
+                {id: "music2", name: "ATN Music", logo: "https://raw.githubusercontent.com/subirkumarpaul/Logo/main/ATN%20Music.png", category: "Bangla Music", number: 402, url: "https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI/atnmusic.stream/playlist.m3u8", provider: "NCARE"},
+                {id: "music3", name: "RTV Music", logo: "https://imgpile.com/images/58YDwk.jpg", category: "Bangla Music", number: 403, url: "https://raw.githubusercontent.com/gift4bd/ytm/main/RTVMusic.m3u8", provider: "RTV"},
+                {id: "music4", name: "Music Bangla", logo: "https://via.placeholder.com/100x60?text=MUSIC", category: "Bangla Music", number: 404, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/musicbangla2025.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+                {id: "music5", name: "Bengali Beats", logo: "https://tplay.live/originals/bengali-beats/bengali-beats.png", category: "Bangla Music", number: 405, url: "https://tplay.live/originals/bengali-beats/index.m3u8", provider: "TPLAY"},
+                {id: "music6", name: "Star jalsha", logo: "https://github.com/learnlinuxonline/ChannelHub/blob/main/icon/starjalsha.png", category: "Bangla Music", number: 406, url: "https://catchup.yuppcdn.net/amazonv2/36/preview/starjalsha/master/chunklist.m3u8", provider: "TPLAY"},
+                 {id: "music7", name: "9xm", logo: "https://i.imgur.com/F17QtN2.png", category: "Bangla Music", number: 406, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/9xm/23886666-8fc5-470f-aab1-bd637ed607b1/3.m3u8", provider: "TPLAY"},
+
+
+              // Movies Channels
+    {id: "sony_max", name: "Sony MAX", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ay52-JQBv9knK3AHFDWt/posters/00afb30b-3c19-4c4c-abd8-891db94e4767.webp", category: "Movies", number: 12, url: "https://bongoflixbd.top/test/live.php?id=sony_max&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_pix", name: "Sony PIX HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp", category: "Movies", number: 13, url: "https://bongoflixbd.top/test/live.php?id=sonypix_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_max2", name: "Sony MAX 2", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ii5_-JQBv9knK3AHLDV3/posters/d961cc87-81b6-4b30-8414-8c0af2774818.webp", category: "Movies", number: 14, url: "https://bongoflixbd.top/test/live.php?id=sonymax_2&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_max_hd", name: "Sony MAX HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ai51-JQBv9knK3AH_jWs/posters/663e52a6-1a9f-4458-b4aa-7c03d84972f1.webp", category: "Movies", number: 15, url: "https://bongoflixbd.top/test/live.php?id=sony_max_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "toffee_movies", name: "Toffee Movies", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/b60Ss5UBrjBfS2_RJPb8/posters/278fd2ab-3320-440c-9e8d-d702cea3dfa8.png", category: "Movies", number: 16, url: "https://bongoflixbd.top/test/live.php?id=toffee_movie&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_action", name: "Zee Action", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Pc3RD5YBtpl-Sbt7doxr/posters/d0f337ab-a7e6-4eed-bc7b-7d51fdc70a0f.png", category: "Movies", number: 17, url: "https://bongoflixbd.top/test/live.php?id=zee_action&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_bangla_cinema", name: "Zee Bangla Cinema", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/-C7MX5UBv9knK3AHdKOi/posters/1f43be2f-f8d9-4a0c-b0cb-971a18a6771c.png", category: "Movies", number: 18, url: "https://bongoflixbd.top/test/live.php?id=zee_bangla_cinema&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_cinema_hd", name: "Zee Cinema HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/5y7HX5UBv9knK3AHs6Nk/posters/794fd415-1b0a-49b5-b91b-2f62ba6cd759.png", category: "Movies", number: 19, url: "https://bongoflixbd.top/test/live.php?id=zee_cinema_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_cafe", name: "Zee Cafe", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/U3QEd5YBcqxnFHJBpYzc/posters/3442d493-0c71-44b9-b12f-8e600d5eab91.png", category: "Movies", number: 20, url: "https://bongoflixbd.top/test/live.php?id=zee_cafe_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_bollywood", name: "Zee Bollywood", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/OnSlPJYBcqxnFHJB6lFX/posters/4818f95a-c64a-490f-b310-a49aec026d71.png", category: "Movies", number: 21, url: "https://bongoflixbd.top/test/live.php?id=zee_bollywood&e=.m3u8", provider: "TOFFEE"},
+    {id: "and_pictures", name: "& Pictures HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/QMwWnZUBtpl-Sbt7S2sx/posters/f2e6acfd-0031-4ca4-b954-c014a0c99058.png", category: "Movies", number: 22, url: "https://bongoflixbd.top/test/live.php?id=andpicture_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "b4u_movies", name: "B4U Movies VIP", logo: "https://images.toffeelive.com/images/program/366/logo/240x240/mobile_logo_702115001663003759.png", category: "Movies", number: 23, url: "https://bongoflixbd.top/test/live.php?id=b4u_movies&e=.m3u8", provider: "TOFFEE"},
+
+             // Drama Channels
+    {id: "toffee_dramas", name: "Toffee Dramas", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/DNMXs5UBm1RY_In7IJ72/posters/25b0cac5-f1e9-4541-a9cd-ab667f27c7b1.png", category: "Drama", number: 24, url: "https://bongoflixbd.top/test/live.php?id=toffee_drama&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_anmol", name: "Zee Anmol", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/7x0Jd5YBEef-9-uVv_Gy/posters/f630a176-73cc-48d7-94cf-69ba0d201b36.png", category: "Drama", number: 25, url: "https://bongoflixbd.top/test/live.php?id=zee_anmol&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_tv_hd", name: "Zee TV HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/ltPQX5UBm1RY_In7b3F1/posters/f81d0cc9-c00e-4839-951a-b754e0e6c58f.png", category: "Drama", number: 26, url: "https://bongoflixbd.top/test/live.php?id=zee_tv_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "and_tv", name: "&TV HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/5cwRnZUBtpl-Sbt7wWrN/posters/28335dab-169c-49b6-8d10-ef697f940307.png", category: "Drama", number: 27, url: "https://bongoflixbd.top/test/live.php?id=and_picture_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_bangla", name: "Zee Bangla", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/kK2aX5UBrjBfS2_RBcKf/posters/16e111ed-2335-4391-9618-f840e4c4a6a2.png", category: "Drama", number: 28, url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_aath", name: "Sony Aath", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/xi6xX5UBv9knK3AH9aMk/posters/f4db1c12-b10f-46e8-a09b-e0efb8820970.png", category: "Drama", number: 29, url: "https://bongoflixbd.top/test/live.php?id=sonyaath&e=.m3u8", provider: "TOFFEE"},
+    {id: "zee_bangla_vip", name: "Zee Bangla VIP", logo: "https://images.toffeelive.com/images/program/340/logo/240x240/mobile_logo_094417001655891123.png", category: "Drama", number: 30, url: "https://bongoflixbd.top/test/live.php?id=zee_bangla&e=.m3u8", provider: "TOFFEE"},
+    {id: "hum_tv", name: "Hum TV", logo: "https://images.toffeelive.com/images/program/303937/logo/240x240/mobile_logo_880134001738072763.png", category: "Drama", number: 31, url: "https://bongoflixbd.top/test/live.php?id=hum_tv&e=.m3u8", provider: "TOFFEE"},
+    {id: "hum_masala", name: "Hum Masala", logo: "https://images.toffeelive.com/images/program/303947/logo/240x240/mobile_logo_203789001738235600.png", category: "Drama", number: 32, url: "https://bongoflixbd.top/test/live.php?id=hum_masala&e=.m3u8", provider: "TOFFEE"},
+    {id: "hum_sitarey", name: "Hum Sitarey", logo: "https://images.toffeelive.com/images/program/303948/logo/240x240/mobile_logo_350939001738236112.png", category: "Drama", number: 33, url: "https://bongoflixbd.top/test/live.php?id=hum_sitaray&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_aath_vip", name: "Sony Aat VIP", logo: "https://images.toffeelive.com/images/program/343/logo/240x240/mobile_logo_496322001666780228.png", category: "Drama", number: 34, url: "https://bongoflixbd.top/test/live.php?id=sonyaath&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_entertainment_hd", name: "SONY ENTERTAINMENT TELEVISION HD VIP", logo: "https://images.toffeelive.com/images/program/602/logo/240x240/mobile_logo_495351001666780441.png", category: "Drama", number: 35, url: "https://bongoflixbd.top/test/live.php?id=sonyentertainmnt_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_entertainment", name: "SONY ENTERTAINMENT TELEVISION", logo: "https://images.toffeelive.com/images/program/57/logo/240x240/mobile_logo_149299001666780350.png", category: "Drama", number: 36, url: "https://bongoflixbd.top/test/live.php?id=sony_entertainment&e=.m3u8", provider: "TOFFEE"},
+    {id: "colours_Bangla", name: "Colours Bangla", logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Colors_Bangla.png", category: "Drama", number: 66, url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/index.m3u8", provider: "TVSEN3"},
+
+                
+          // Family Channels
+    {id: "sony_yay", name: "Sony YAY", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/IC5_-JQBv9knK3AHFDXh/posters/36df4012-80f2-4a98-9970-3b663f62093f.webp", category: "Family", number: 37, url: "https://bongoflixbd.top/test/live.php?id=sonyyay&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_bbc_earth", name: "Sony BBC Earth HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/MC6C-JQBv9knK3AHUzUT/posters/a8c32fd3-2ba7-437c-85ac-de2f1b2fa6ca.webp", category: "Family", number: 38, url: "https://bongoflixbd.top/test/live.php?id=sonybbc_earth_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "sony_sab", name: "Sony SAB HD", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/ES55-JQBv9knK3AHNDWC/posters/13411be9-62b9-4a99-a062-b6e91dfb1099.webp", category: "Family", number: 39, url: "https://bongoflixbd.top/test/live.php?id=sonysab_hd&e=.m3u8", provider: "TOFFEE"},
+
+
+              // Adventure Channels
+    {id: "discovery", name: "Discovery", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/KS6x-JQBv9knK3AHwDZy/posters/6594d216-aaca-4eee-b6f5-bbc6b80feb15.webp", category: "Adventure", number: 40, url: "https://bongoflixbd.top/test/live.php?id=discovery_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "tlc_hd", name: "TLC HD", logo: "https://images.toffeelive.com/images/program/608/logo/240x240/mobile_logo_648826001673178929.png", category: "Adventure", number: 41, url: "https://bongoflixbd.top/test/live.php?id=https://bongoflixbd.top/test/?watch=tlc_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "tlc_sd", name: "TLC", logo: "https://images.toffeelive.com/images/program/358/logo/240x240/mobile_logo_048875001673178985.png", category: "Adventure", number: 42, url: "https://bongoflixbd.top/test/live.php?id=tlc_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "animal_planet", name: "Animal Planet", logo: "https://images.toffeelive.com/images/program/359/logo/240x240/mobile_logo_835681001673175607.png", category: "Adventure", number: 43, url: "https://bongoflixbd.top/test/live.php?id=animal_planet_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "animal_planet_hd", name: "Animal Planet HD", logo: "https://images.toffeelive.com/images/program/18096/logo/240x240/mobile_logo_032001001673194753.png", category: "Adventure", number: 44, url: "https://bongoflixbd.top/test/live.php?id=animal_planet_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "discovery_hd", name: "Discovery HD", logo: "https://images.toffeelive.com/images/program/18093/logo/240x240/mobile_logo_868363001673181438.png", category: "Adventure", number: 45, url: "https://bongoflixbd.top/test/live.php?id=discovery_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "discovery_science", name: "Discovery Science", logo: "https://images.toffeelive.com/images/program/378/logo/240x240/mobile_logo_604754001673177502.png", category: "Adventure", number: 46, url: "https://bongoflixbd.top/test/live.php?id=discovery_science&e=.m3u8", provider: "TOFFEE"},
+    {id: "discovery_turbo", name: "Discovery Turbo", logo: "https://images.toffeelive.com/images/program/379/logo/240x240/mobile_logo_775127001673177876.png", category: "Adventure", number: 47, url: "https://bongoflixbd.top/test/live.php?id=discovery_turbo&e=.m3u8", provider: "TOFFEE"},
+    {id: "investigation_discovery", name: "Investigation Discovery HD", logo: "https://images.toffeelive.com/images/program/18094/logo/240x240/mobile_logo_154805001673178308.png", category: "Adventure", number: 48, url: "https://bongoflixbd.top/test/live.php?id=discovary_investigation_hd&e=.m3u8", provider: "TOFFEE"},
+
+          // Music Channels
+    {id: "zing", name: "Zing", logo: "https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/DK8dd5YBrjBfS2_Ru22e/posters/a89a1e2e-677c-4a8a-9a66-dff5e0b921c8.png", category: "Music", number: 49, url: "https://bongoflixbd.top/test/live.php?id=zing_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "b4u_music", name: "B4U Music VIP", logo: "https://images.toffeelive.com/images/program/367/logo/115x115/mobile_logo_886909001563629905.png", category: "Music", number: 50, url: "https://bongoflixbd.top/test/live.php?id=b4u_music&e=.m3u8", provider: "TOFFEE"},
+     {id: "PTC_music", name: "PTC Music VIP", logo: "https://static.wikia.nocookie.net/logopedia/images/1/11/Ptc_Music.jpg", category: "Music", number: 67, url: "https://d2lk5u59tns74c.cloudfront.net/out/v1/f913cf893c594f73b114216e74a2efbc/index.m3u8", provider: "PTC"},
+
+
+                
+    // Kids Channels
+    {id: "cartoon_network_hd", name: "Cartoon Network HD", logo: "https://images.toffeelive.com/images/program/26942/logo/240x240/mobile_logo_443429001678950505.png", category: "Kids", number: 51, url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_hd&e=.m3u8", provider: "TOFFEE"},
+    {id: "cartoon_network", name: "Cartoon Network", logo: "https://images.toffeelive.com/images/program/27232/logo/240x240/mobile_logo_320294001679201065.png", category: "Kids", number: 52, url: "https://bongoflixbd.top/test/live.php?id=cartoon_network_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "pogo", name: "Pogo", logo: "https://images.toffeelive.com/images/program/27159/logo/240x240/mobile_logo_740957001679201029.png", category: "Kids", number: 53, url: "https://bongoflixbd.top/test/live.php?id=pogo_sd&e=.m3u8", provider: "TOFFEE"},
+    {id: "discovery_kids", name: "Discovery Kids", logo: "https://images.toffeelive.com/images/program/611/logo/240x240/mobile_logo_430542001673177743.png", category: "Kids", number: 54, url: "https://bongoflixbd.top/test/live.php?id=discovery_kids&e=.m3u8", provider: "TOFFEE"},
+
+    // News Channels
+    {id: "cnn_vip", name: "CNN VIP", logo: "https://images.toffeelive.com/images/program/333/logo/240x240/mobile_logo_146607001735536058.png", category: "News", number: 55, url: "https://bongoflixbd.top/test/live.php?id=cnn&e=.m3u8", provider: "TOFFEE"},
+              
+			  
+			  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+			  ///////////////////////////////////////// New list date 24-10-2025 //////////////////////////////////////
+			  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+			  
+			// Sports Channels
+{id: "tsports1", name: "T Sports HD", logo: "https://i.ibb.co.com/Q3F9JyKH/T-Sports.jpg", category: "Sports", number: 1, url: "http://103.151.60.204/T-Sports/tracks-v1a1/mono.m3u8", provider: "IPTV"},
+{id: "tsports2", name: "T Sports HD", logo: "https://i.ibb.co.com/Q3F9JyKH/T-Sports.jpg", category: "Sports", number: 2, url: "http://stvlive.net:8080/tsports1/index.m3u8", provider: "STVLIVE"},
+{id: "wwe", name: "WWE", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 3, url: "https://tiger-hub.vercel.app/WWE/2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "hubsports1", name: "Hub Sports 1", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 4, url: "https://tiger-hub.vercel.app/Hub_Sports-1/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "hubsports2", name: "Hub Sports 2", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 5, url: "https://tiger-hub.vercel.app/Hub_Sports-2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "hubsports3", name: "Hub Sports 3", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 6, url: "https://tiger-hub.vercel.app/Hub_Sports-3/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "hubsports4", name: "Hub Sports 4", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 7, url: "https://tiger-hub.vercel.app/Hub_Sports-4/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "fancode", name: "Fancode", logo: "https://i.postimg.cc/XqfwwQGH/Fancode.jpg", category: "Sports", number: 8, url: "", provider: "FANCODE"},
+{id: "sonyliv", name: "Sony Liv", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 9, url: "https://dai.google.com/linear/hls/event/-8ZdRZfGTvG731m1OlXeIg/master.m3u8", provider: "GOOGLE"},
+{id: "eurosport1", name: "Eurosport HD", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 10, url: "http://151.80.18.177:86/Eurosport_HD/index.m3u8", provider: "IPTV"},
+{id: "eurosport2", name: "Eurosport HD", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 11, url: "http://66.102.120.18:8000/play/a01g", provider: "IPTV"},
+{id: "asports", name: "A Sports", logo: "https://i.ibb.co.com/VpLFC41v/Astro-Cricket.jpg", category: "Sports", number: 12, url: "http://66.102.120.18:8000/play/a032", provider: "IPTV"},
+{id: "astrocricket", name: "Astro Cricket", logo: "https://i.ibb.co.com/VpLFC41v/Astro-Cricket.jpg", category: "Sports", number: 13, url: "", provider: "ASTRO"},
+{id: "foxcricket", name: "Fox Cricket 501", logo: "https://i.postimg.cc/cC5zmCyv/Supersports-Cricket.jpg", category: "Sports", number: 14, url: "", provider: "FOX"},
+{id: "skysportscricket", name: "Sky Sports Cricket", logo: "https://i.postimg.cc/g0XYC8FP/Sky-Sports-Cricket.jpg", category: "Sports", number: 15, url: "", provider: "SKY"},
+{id: "willowhd", name: "Willow HD", logo: "https://i.ibb.co.com/b5cVh5Wp/Willow-HD.jpg", category: "Sports", number: 16, url: "", provider: "WILLOW"},
+{id: "willow2", name: "Willow 2 HD", logo: "https://i.ibb.co.com/b5cVh5Wp/Willow-HD.jpg", category: "Sports", number: 17, url: "", provider: "WILLOW"},
+{id: "starsports1hd", name: "Star Sports 1 HD", logo: "https://i.postimg.cc/8cYLb3kY/Star-Sports-1-HD.jpg", category: "Sports", number: 18, url: "", provider: "STAR"},
+{id: "starsports1hindihd", name: "Star Sports 1 HD Hindi", logo: "https://i.postimg.cc/jSPkL6ZT/Star-Sports-1-HD-Hindi.jpg", category: "Sports", number: 19, url: "", provider: "STAR"},
+{id: "starsports2hd", name: "Star Sports 2 HD", logo: "https://i.postimg.cc/3NGbmgY2/Star-Sports-2.jpg", category: "Sports", number: 20, url: "", provider: "STAR"},
+{id: "starsports3", name: "Star Sports 3", logo: "https://i.postimg.cc/ryHX6q6V/Star-Sports-3.jpg", category: "Sports", number: 21, url: "https://tiger-hub.vercel.app/Star_sports-3/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "starsportsselect1", name: "Star Sports Select 1 HD", logo: "https://i.ibb.co.com/q3rN5Jmp/Star-Sports-Select-1-HD.jpg", category: "Sports", number: 22, url: "http://116.90.120.149:8000/play/a0cl/index.m3u8", provider: "IPTV"},
+{id: "starsportsselect2", name: "Star Sports Select 2 HD", logo: "https://i.postimg.cc/KYVKwLhK/Star-Sports-Select-2-HD.jpg", category: "Sports", number: 23, url: "http://116.90.120.149:8000/play/a0cm/index.m3u8", provider: "IPTV"},
+{id: "geosuper", name: "Geo Super", logo: "https://i.postimg.cc/Zqvpmns1/Geo-Super.jpg", category: "Sports", number: 24, url: "", provider: "GEO"},
+{id: "ptvsports1", name: "PTV Sports", logo: "https://i.ibb.co.com/7Jzck3ZR/PTV-Sports.jpg", category: "Sports", number: 25, url: "http://175.107.244.52:4456/play/a042", provider: "IPTV"},
+{id: "ptvsports2", name: "PTV Sports", logo: "https://i.ibb.co.com/7Jzck3ZR/PTV-Sports.jpg", category: "Sports", number: 26, url: "http://66.102.120.18:8000/play/a04w", provider: "IPTV"},
+{id: "tensports", name: "Ten Sports HD", logo: "https://i.postimg.cc/x1VYmp0L/Ten-Sports.jpg", category: "Sports", number: 27, url: "", provider: "TEN"},
+{id: "eurosport", name: "Euro Sport", logo: "https://i.ibb.co.com/Mr87xG7/A-Sports-HD.jpg", category: "Sports", number: 28, url: "", provider: "EUROSPORT"},
+{id: "sonysports1", name: "Sony Sports 1 HD", logo: "https://i.postimg.cc/m2sv0bW0/Sony-Sports-1-HD.jpg", category: "Sports", number: 29, url: "https://tiger-hub.vercel.app/SONY/Sports-1/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonysports1_2", name: "Sony Sports 1 HD", logo: "https://i.postimg.cc/m2sv0bW0/Sony-Sports-1-HD.jpg", category: "Sports", number: 30, url: "http://66.102.120.18:8000/play/a002", provider: "IPTV"},
+{id: "sonysports2", name: "Sony Sports 2 HD", logo: "https://i.postimg.cc/v8rY12Yw/Sony-Sports-2-HD.jpg", category: "Sports", number: 31, url: "https://tiger-hub.vercel.app/SONY/Sports-2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonysports2_2", name: "Sony Sports 2 HD", logo: "https://i.postimg.cc/v8rY12Yw/Sony-Sports-2-HD.jpg", category: "Sports", number: 32, url: "http://66.102.120.18:8000/play/a01y", provider: "IPTV"},
+{id: "sonysports3", name: "Sony Sports 3 HD", logo: "https://i.postimg.cc/3xXCW92d/Sony-Sports-3-HD.jpg", category: "Sports", number: 33, url: "http://66.102.120.18:8000/play/a001", provider: "IPTV"},
+{id: "sonysports4", name: "Sony Sports 4 HD", logo: "https://i.postimg.cc/7YH1WSzz/Sony-Sports-4-HD.jpg", category: "Sports", number: 34, url: "", provider: "SONY"},
+{id: "sonysports5", name: "Sony Sports 5 HD", logo: "https://i.ibb.co.com/8gykwqxf/Sony-Sports-5-HD.jpg", category: "Sports", number: 35, url: "https://tiger-hub.vercel.app/SONY/Sports-5/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonysports5_2", name: "Sony Sports 5 HD", logo: "https://i.ibb.co.com/8gykwqxf/Sony-Sports-5-HD.jpg", category: "Sports", number: 36, url: "http://66.102.120.18:8000/play/a010", provider: "IPTV"},
+{id: "ddsports", name: "DD Sports", logo: "https://i.postimg.cc/7hVCMDyZ/dd-sports.jpg", category: "Sports", number: 37, url: "https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/b17adfe543354fdd8d189b110617cddd/index_3.m3u8", provider: "CLOUDFRONT"},
+{id: "laligatv", name: "La Liga TV", logo: "https://i.postimg.cc/7hVCMDyZ/dd-sports.jpg", category: "Sports", number: 38, url: "", provider: "LALIGA"},
+{id: "msports", name: "M Sports", logo: "https://i.postimg.cc/RFjrsn4P/M-Sports.jpg", category: "Sports", number: 39, url: "http://103.101.197.10:8989/M_Movies/index.m3u8", provider: "IPTV"},
+{id: "motorracing", name: "Motor Racing", logo: "https://i.postimg.cc/RFjrsn4P/M-Sports.jpg", category: "Sports", number: 40, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/motorracing/8bcb2a17-8806-4fdc-84d8-11a88aadde90/2.m3u8", provider: "CLOUDFRONT"},
+{id: "supersportscricket", name: "Super Sports Cricket", logo: "https://i.postimg.cc/cC5zmCyv/Supersports-Cricket.jpg", category: "Sports", number: 41, url: "", provider: "SUPERSPORTS"},
+{id: "beinsportsxtra", name: "Bein Sports Xtra", logo: "https://i.postimg.cc/436jGs29/Bein-Sports-Xtra.jpg", category: "Sports", number: 42, url: "https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8", provider: "AMAGI"},
+{id: "dubaisports2", name: "Dubai Sports 2", logo: "https://i.postimg.cc/8C7BdHMr/Dubai-Sports-2.jpg", category: "Sports", number: 43, url: "http://dmitwlvvll.cdn.mangomolo.com/dubaisportshd/dubaisportshd/chunklist.m3u8", provider: "MANGOMOLO"},
+{id: "dubaisports3", name: "Dubai Sports 3", logo: "https://i.postimg.cc/zfhHXPTT/Dubai-Sports-3.jpg", category: "Sports", number: 44, url: "http://dmitwlvvll.cdn.mangomolo.com/dubaisportshd5/dubaisportshd5/chunklist.m3u8", provider: "MANGOMOLO"},
+{id: "fightnetwork", name: "Fight Network", logo: "https://i.postimg.cc/gjZzG3WD/Fight-Network.jpg", category: "Sports", number: 45, url: "", provider: "FIGHT"},
+{id: "ksports1", name: "K Sports 1", logo: "https://i.postimg.cc/gjZzG3WD/Fight-Network.jpg", category: "Sports", number: 46, url: "https://tiger-hub.vercel.app/SPORT-ZONE/K-Sports_1/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "ksports2", name: "K Sports 2", logo: "https://i.postimg.cc/gjZzG3WD/Fight-Network.jpg", category: "Sports", number: 47, url: "https://tiger-hub.vercel.app/SPORT-ZONE/K-Sports_2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "ksports3", name: "K Sports 3", logo: "https://i.postimg.cc/gjZzG3WD/Fight-Network.jpg", category: "Sports", number: 48, url: "https://tiger-hub.vercel.app/SPORT-ZONE/K-Sports_3/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tennischannel1", name: "Tennis Channel", logo: "https://i.ibb.co.com/HT0W29vz/Tennis-Channel.jpg", category: "Sports", number: 49, url: "http://212.102.60.10/TENNIS_CHANNEL/index.m3u8", provider: "IPTV"},
+{id: "tennischannel2", name: "Tennis Channel", logo: "https://i.ibb.co.com/HT0W29vz/Tennis-Channel.jpg", category: "Sports", number: 50, url: "https://tennischannel-int-samsunguk.amagi.tv/playlist.m3u8", provider: "AMAGI"},
+{id: "tntsports1", name: "TNT Sports 1", logo: "https://i.postimg.cc/76DdVhNJ/TNT-Sports-1.jpg", category: "Sports", number: 51, url: "", provider: "TNT"},
+{id: "tracesport", name: "Trace Sport", logo: "https://i.postimg.cc/nr9H8z0m/Tennis-Channel.jpg", category: "Sports", number: 52, url: "https://lightning-tracesport-samsungau.amagi.tv/playlist.m3u8", provider: "AMAGI"},
+{id: "tsnsports1", name: "TSN Sports 1", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 53, url: "https://tiger-hub.vercel.app/SPORT-ZONE/TSN-1/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tsnsports1_2", name: "TSN Sports 1", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 54, url: "http://212.102.60.231/TSN_1/index.m3u8", provider: "IPTV"},
+{id: "tsnsports2", name: "TSN Sports 2", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 55, url: "https://tiger-hub.vercel.app/SPORT-ZONE/TSN-2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tsnsports2_2", name: "TSN Sports 2", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 56, url: "http://212.102.60.231/TSN_2/index.m3u8", provider: "IPTV"},
+{id: "tsnsports3", name: "TSN Sports 3", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 57, url: "https://tiger-hub.vercel.app/SPORT-ZONE/TSN-3/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tsnsports3_2", name: "TSN Sports 3", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 58, url: "http://212.102.60.231/TSN_3/index.m3u8", provider: "IPTV"},
+{id: "tsnsports4", name: "TSN Sports 4", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 59, url: "https://tiger-hub.vercel.app/SPORT-ZONE/TSN-4/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tsnsports4_2", name: "TSN Sports 4", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 60, url: "http://212.102.60.231/TSN_4/index.m3u8", provider: "IPTV"},
+{id: "tsnsports5", name: "TSN Sports 5", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 61, url: "http://212.102.60.231/TSN_5/index.m3u8", provider: "IPTV"},
+{id: "seesports3", name: "See Sports 3", logo: "https://i.postimg.cc/1zGyNBS9/TNT-Sports.jpg", category: "Sports", number: 62, url: "https://tiger-hub.vercel.app/SPORT-ZONE/TSN-6/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "horsecountry", name: "Horse & Country", logo: "https://i.postimg.cc/nr9H8z0m/Tennis-Channel.jpg", category: "Sports", number: 63, url: "https://hncfree-samsungau.amagi.tv/playlist.m3u8", provider: "AMAGI"},
+{id: "sports18", name: "Sports 18 HD", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 64, url: "", provider: "SPORTS18"},
+{id: "truevisionsports", name: "True Vision Sports", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 65, url: "http://195.128.27.141:80/play/live.php?mac=00:1A:79:24:1B:18&stream=191873&extension=m3u8", provider: "IPTV"},
+{id: "ksasport1", name: "KSA SPORT 1 HD", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 66, url: "http://66.102.120.18:8000/play/a03o", provider: "IPTV"},
+{id: "ksasport2", name: "KSA SPORT 2 HD", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 67, url: "http://66.102.120.18:8000/play/a03p", provider: "IPTV"},
+{id: "starsports1tamil", name: "Star Sports 1 HD Tamil", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 68, url: "http://ptu.ridsys.in/riptv/live/stream20/index.m3u8", provider: "IPTV"},
+{id: "fs1sport", name: "FS 1 SPORT", logo: "https://i.postimg.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 69, url: "http://212.102.60.10/FOX_Sports_1/index.m3u8", provider: "IPTV"},
+{id: "espnpremium", name: "ESPN PREMIUM", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 70, url: "http://190.102.246.93:9005/play/a00x", provider: "IPTV"},
+{id: "espn2", name: "ESPN 2", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 71, url: "http://190.102.246.93:9005/play/a029", provider: "IPTV"},
+{id: "espn3", name: "ESPN 3", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 72, url: "http://190.102.246.93:9005/play/a02l", provider: "IPTV"},
+{id: "espn1norte", name: "ESPN 1 NORTE", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 73, url: "http://45.71.254.1:8000/play/a0e6/index.m3u8", provider: "IPTV"},
+{id: "espn2norte", name: "ESPN 2 NORTE", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 74, url: "http://45.71.254.1:8000/play/a0e7/index.m3u8", provider: "IPTV"},
+{id: "espn", name: "ESPN", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 75, url: "http://45.71.254.1:8000/play/a038/index.m3u8", provider: "IPTV"},
+{id: "europesports1", name: "Europe Sports 1 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 76, url: "http://185.189.225.157/EuroSport1/index.m3u8", provider: "IPTV"},
+{id: "europesports2", name: "Europe Sports 2 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 77, url: "http://185.189.225.157/EuroSport2/index.m3u8", provider: "IPTV"},
+{id: "sport1hd", name: "Sport 1 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 78, url: "http://178.23.88.55/Sport1/index.m3u8", provider: "IPTV"},
+{id: "novasport", name: "Nova Sport", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 79, url: "http://178.23.88.55/Nova_Sport/index.m3u8", provider: "IPTV"},
+{id: "eurosport2", name: "Eurosport 2", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 80, url: "http://178.23.88.55/Eurosport_2/index.m3u8", provider: "IPTV"},
+{id: "arenasport", name: "Arena Sport", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 81, url: "http://178.23.88.55/Arena_sport/index.m3u8", provider: "IPTV"},
+{id: "arenasport1", name: "Arena Sport 1 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 82, url: "http://78.108.251.7/Arena_Sport_1/index.m3u8", provider: "IPTV"},
+{id: "arenasport2", name: "Arena Sport 2 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 83, url: "http://78.108.251.7/Arena_Sport_2/index.m3u8", provider: "IPTV"},
+{id: "arenasport3", name: "Arena Sport 3 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 84, url: "http://78.108.251.7/Arena_Sport_3/index.m3u8", provider: "IPTV"},
+{id: "arenasport4", name: "Arena Sport 4 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 85, url: "http://78.108.251.7/Arena_Sport_4/index.m3u8", provider: "IPTV"},
+{id: "arenasport5", name: "Arena Sport 5 HD", logo: "https://i.post.img.cc/5091KXGg/Sports-18.jpg", category: "Sports", number: 86, url: "http://78.108.251.7/Arena_Sport_5/index.m3u8", provider: "IPTV"},
+
+// Live Sports Channels
+{id: "starsports1hindi", name: "Star Sports 1 Hindi HD", logo: "https://i.postimg.cc/jSPkL6ZT/Star-Sports-1-HD-Hindi.jpg", category: "Live Sports", number: 101, url: "http://116.90.120.149:8000/play/a0bv/index.m3u8", provider: "IPTV"},
+{id: "starsports2hindi", name: "Star Sports 2 HD Hindi", logo: "https://i.postimg.cc/3NGbmgY2/Star-Sports-2.jpg", category: "Live Sports", number: 102, url: "http://116.90.120.149:8000/play/a0cs/index.m3u8", provider: "IPTV"},
+
+// Bangladesh Channels
+{id: "anandatv", name: "Ananda TV", logo: "https://i.ibb.co.com/zhpfnXry/Ananda-TV.jpg", category: "Bangla Entertainment", number: 201, url: "http://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/anandatv.stream/playlist.m3u8", provider: "JAGOBD"},
+{id: "asiantv", name: "Asian TV", logo: "https://i.postimg.cc/D04SQBVt/Asian-TV.jpg", category: "Bangla Entertainment", number: 202, url: "", provider: "ASIAN"},
+{id: "atnbangla", name: "ATN Bangla", logo: "https://i.ibb.co/F41Zgxyr/ATN-Bangla.jpg", category: "Bangla Entertainment", number: 203, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1722/output/1722-audio_113522_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "atnbanglauk", name: "ATN Bangla UK", logo: "https://i.postimg.cc/ZqPGzW3x/ATN-Bangla.jpg", category: "Bangla Entertainment", number: 204, url: "", provider: "ATN"},
+{id: "atnnews", name: "ATN News", logo: "https://i.postimg.cc/PxyNJrGm/ATN-News.jpg", category: "Bangla News", number: 205, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1706/output/index.m3u8", provider: "GPCDN"},
+{id: "banglatv", name: "Bangla TV", logo: "https://i.postimg.cc/qqXGm6D1/Bangla-TV.jpg", category: "Bangla Entertainment", number: 206, url: "", provider: "BANGLA"},
+{id: "bangla21", name: "Bangla 21 HD", logo: "https://i.postimg.cc/qqXGm6D1/Bangla-TV.jpg", category: "Bangla Entertainment", number: 207, url: "", provider: "BANGLA21"},
+{id: "banglavision1", name: "Banglavision", logo: "https://i.ibb.co/h1fRcgM2/Banglavision.jpg", category: "Bangla Entertainment", number: 208, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1715/output/1715-audio_113452_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "banglavision2", name: "Banglavision", logo: "https://i.ibb.co/h1fRcgM2/Banglavision.jpg", category: "Bangla Entertainment", number: 209, url: "http://stvlive.net:8080/banglavision/index.m3u8", provider: "STVLIVE"},
+{id: "bijoytv", name: "Bijoy TV", logo: "https://i.postimg.cc/1tnFM9wC/Bijoy-TV.jpg", category: "Bangla Entertainment", number: 210, url: "", provider: "BIJOY"},
+{id: "bishwabangla", name: "Bishwa Bangla", logo: "https://i.postimg.cc/1tnFM9wC/Bijoy-TV.jpg", category: "Bangla Entertainment", number: 211, url: "", provider: "BISHWA"},
+{id: "boishakhitv", name: "Boishakhi TV", logo: "https://i.postimg.cc/vBW8D5m8/Boiskakhi.jpg", category: "Bangla Entertainment", number: 212, url: "", provider: "BOISHAKHI"},
+{id: "btv", name: "BTV", logo: "https://i.postimg.cc/cJHPmjNJ/BTV.jpg", category: "Bangla Entertainment", number: 213, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "btvchattogram", name: "BTV Chattogram", logo: "https://i.postimg.cc/76p1QShQ/BTV-Chattogram.jpg", category: "Bangla Entertainment", number: 214, url: "", provider: "BTV"},
+{id: "btvnews", name: "BTV News HD", logo: "https://i.postimg.cc/Qx21w3kr/btv-news.jpg", category: "Bangla News", number: 215, url: "", provider: "BTV"},
+{id: "btvworld", name: "BTV World", logo: "https://i.postimg.cc/g2Jw8nkw/BTV-World.jpg", category: "Bangla Entertainment", number: 216, url: "", provider: "BTV"},
+{id: "channeli1", name: "Channel I", logo: "https://i.postimg.cc/tJq1jBzG/Channel-i.jpg", category: "Bangla Entertainment", number: 217, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "channeli2", name: "Channel I", logo: "https://i.post.img.cc/tJq1jBzG/Channel-i.jpg", category: "Bangla Entertainment", number: 218, url: "http://stvlive.net:8080/channeli/index.m3u8", provider: "STVLIVE"},
+{id: "channels", name: "Channel S", logo: "https://i.post.img.cc/76p1QShQ/BTV-Chattogram.jpg", category: "Bangla Entertainment", number: 219, url: "", provider: "CHANNELS"},
+{id: "channel24", name: "Channel 24", logo: "https://i.post.img.cc/C1CCfh6n/Channel-24.jpg", category: "Bangla News", number: 220, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "channel9", name: "Channel 9", logo: "https://i.post.img.cc/0NzFtxgL/Channel-9.jpg", category: "Bangla Entertainment", number: 221, url: "", provider: "CHANNEL9"},
+{id: "cumillatv", name: "Cumilla TV", logo: "https://i.post.img.cc/0NzFtxgL/Channel-9.jpg", category: "Bangla Entertainment", number: 222, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/cumilla24bd.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "dbcnews", name: "DBC News", logo: "https://i.post.img.cc/BQzrR9JZ/DBC-News.jpg", category: "Bangla News", number: 223, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/dbcnews.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "deeptotv", name: "Deepto TV", logo: "https://i.post.img.cc/L6WP5g60/Deepto-TV.jpg", category: "Bangla Entertainment", number: 224, url: "https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8", provider: "GPCDN"},
+{id: "deshebideshe", name: "Deshe Bideshe", logo: "https://i.post.img.cc/h48D881V/Deshe-Bideshe.jpg", category: "Bangla Entertainment", number: 225, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/deshebideshe.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "deshtv", name: "Desh TV", logo: "https://i.post.img.cc/wvBbd56q/Desh-TV.jpg", category: "Bangla Entertainment", number: 226, url: "", provider: "DESH"},
+{id: "deshitv", name: "Deshi TV", logo: "https://i.post.img.cc/t4cxjxRj/Deshi-TV.jpg", category: "Bangla Entertainment", number: 227, url: "https://deshitv.deshitv24.net/live/myStream/playlist.m3u8", provider: "DESHITV"},
+{id: "ekattortv", name: "Ekattor TV", logo: "https://i.post.img.cc/JzDLh7pB/Ekattor.jpg", category: "Bangla News", number: 228, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1705/output/1705-audio_113352_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "ekhontv", name: "Ekhon TV", logo: "https://i.post.img.cc/G2XchN1w/Ekhon-TV.jpg", category: "Bangla News", number: 229, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/globaltv.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "ekusheetv", name: "Ekushe ETV", logo: "https://i.post.img.cc/Nj5XJGD8/Ekushe.jpg", category: "Bangla Entertainment", number: 230, url: "http://210.4.72.204/hls-live/livepkgr/_definst_/liveevent/livestream3.m3u8", provider: "IPTV"},
+{id: "gtv", name: "GTV HD", logo: "https://i.ibb.co.com/XxJ2W4KF/GTV.jpg", category: "Bangla Entertainment", number: 231, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/gazibdz.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "globaltv", name: "Global TV", logo: "https://i.post.img.cc/gJqSzqBb/Global-TV.jpg", category: "Bangla Entertainment", number: 232, url: "", provider: "GLOBAL"},
+{id: "independenttv", name: "Independent TV", logo: "https://i.post.img.cc/VLrcGjj7/Independent.jpg", category: "Bangla News", number: 233, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1704/output/1704-audio_113342_eng=113200-video=1692000.m3u8", provider: "GPCDN"},
+{id: "jamunatv1", name: "Jamuna TV", logo: "https://i.post.img.cc/63K8YKmD/Jamuna-TV.jpg", category: "Bangla News", number: 234, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1701/output/1701-audio_113312_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "jamunatv2", name: "Jamuna TV", logo: "https://i.post.img.cc/63K8YKmD/Jamuna-TV.jpg", category: "Bangla News", number: 235, url: "http://stvlive.net:8080/jamuna/index.m3u8", provider: "STVLIVE"},
+{id: "maasrangatv", name: "Maasranga TV", logo: "https://i.post.img.cc/4NVxpW6t/Maasranga.jpg", category: "Bangla Entertainment", number: 236, url: "https://mtv.sunplex.live/MAASRANGA-TV/index.m3u8", provider: "SUNPLEX"},
+{id: "magicbangla", name: "Magic Bangla TV", logo: "https://i.post.img.cc/4NVxpW6t/Maasranga.jpg", category: "Bangla Entertainment", number: 237, url: "http://mbanglatv.jolshabd.com:1935/live/mbanglatv/chunklist_w1542703515.m3u8", provider: "JOLSHABD"},
+{id: "metv", name: "Me TV", logo: "https://i.post.img.cc/qMZKm8Fc/ME-TV.jpg", category: "Bangla Entertainment", number: 238, url: "http://stvlive.net:8080/metv/index.m3u8", provider: "STVLIVE"},
+{id: "milleniumtv", name: "Millenium TV", logo: "https://i.post.img.cc/FzJdfnyk/Millenium-TV.jpg", category: "Bangla Entertainment", number: 239, url: "", provider: "MILLENIUM"},
+{id: "mohonatv", name: "Mohona TV", logo: "https://i.ibb.co.com/spw1Vz7q/Mohona-TV.jpg", category: "Bangla Entertainment", number: 240, url: "", provider: "MOHONA"},
+{id: "moviebangla1", name: "Movie Bangla", logo: "https://i.ibb.co.com/prX6HQTh/Movie-Bangla.jpg", category: "Bangla Entertainment", number: 241, url: "http://alvetv.com/moviebanglatv/8080/index.m3u8", provider: "ALVETV"},
+{id: "moviebangla2", name: "Movie Bangla", logo: "https://i.ibb.co.com/prX6HQTh/Movie-Bangla.jpg", category: "Bangla Entertainment", number: 242, url: "http://stvlive.net:8080/moviebangla/index.m3u8", provider: "STVLIVE"},
+{id: "mytv", name: "My TV", logo: "https://i.post.img.cc/XY60wPgT/My-TV.jpg", category: "Bangla Entertainment", number: 243, url: "https://mytvbangla.com/0.m3u8", provider: "MYTV"},
+{id: "ntv", name: "NTV", logo: "https://i.post.img.cc/zfrz2hw9/NTV.jpg", category: "Bangla Entertainment", number: 244, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1716/output/1716-audio_113462_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "nagoriktv", name: "Nagorik TV", logo: "https://i.post.img.cc/QCQfYVXK/Nagorik-TV.jpg", category: "Bangla Entertainment", number: 245, url: "", provider: "NAGORIK"},
+{id: "nantv", name: "NAN TV", logo: "https://i.post.img.cc/d0Kzg7Hb/NAN-TV.jpg", category: "Bangla Entertainment", number: 246, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/nantv.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "news24", name: "News 24 HD", logo: "https://i.post.img.cc/Jndww2tm/News-24-HD.jpg", category: "Bangla News", number: 247, url: "", provider: "NEWS24"},
+{id: "nexustv", name: "Nexus TV", logo: "https://i.ibb.co.com/Q3pnrdLs/Nexus-TV.jpg", category: "Bangla Entertainment", number: 248, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/nantv.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "nobannotv", name: "Nobanno TV", logo: "https://i.ibb.co.com/spfYz9qy/Nobanno-TV.jpg", category: "Bangla Entertainment", number: 249, url: "", provider: "NOBANNO"},
+{id: "nrbtv", name: "NRB TV", logo: "https://i.post.img.cc/k483f9rT/NRB.jpg", category: "Bangla Entertainment", number: 250, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/nrb-eu.stream/tracks-v1a1/mono.m3u8", provider: "JAGOBD"},
+{id: "rtv", name: "RTV", logo: "https://i.post.img.cc/Qdr7mnkW/RTV.jpg", category: "Bangla Entertainment", number: 251, url: "", provider: "RTV"},
+{id: "rajdhanitv", name: "Rajdhani TV", logo: "https://i.post.img.cc/HW5LFNtR/Rajshani-TV.jpg", category: "Bangla Entertainment", number: 252, url: "", provider: "RAJDHANI"},
+{id: "satv", name: "SA TV", logo: "https://i.post.img.cc/Ss8dZ7pz/SA-TV.jpg", category: "Bangla Entertainment", number: 253, url: "", provider: "SATV"},
+{id: "somoytv1", name: "Somoy TV", logo: "https://i.post.img.cc/hvcWR1Yz/Somoy-TV.jpg", category: "Bangla News", number: 254, url: "https://owrcovcrpy.gpcdn.net/bpk-tv/1702/output/1702-audio_113322_eng=113200-video=2202800.m3u8", provider: "GPCDN"},
+{id: "somoytv2", name: "Somoy TV", logo: "https://i.post.img.cc/hvcWR1Yz/Somoy-TV.jpg", category: "Bangla News", number: 255, url: "http://stvlive.net:8080/somoy/index.m3u8", provider: "STVLIVE"},
+{id: "times24", name: "Times 24", logo: "https://i.post.img.cc/tRKzj7Vk/Times-24.jpg", category: "Bangla News", number: 256, url: "", provider: "TIMES24"},
+{id: "tbn24", name: "TBN 24", logo: "https://i.post.img.cc/fT8DBYCL/TBN24.jpg", category: "Bangla News", number: 257, url: "", provider: "TBN24"},
+{id: "varendratv", name: "Varendra TV", logo: "https://i.post.img.cc/qMV3pHHn/Varendra-TV.jpg", category: "Bangla Entertainment", number: 258, url: "", provider: "VARENDRA"},
+{id: "usbdjournal", name: "US-BD Journal 24 TV", logo: "https://i.post.img.cc/tRKzj7Vk/Times-24.jpg", category: "Bangla News", number: 259, url: "http://208.86.19.13:81/510.stream/index.m3u8", provider: "IPTV"},
+
+// Indian Bangla Channels
+{id: "starjalshahd", name: "Star Jalsha HD", logo: "https://i.post.img.cc/1tmcNHW3/Star-Jalsha-HD.jpg", category: "Indian Bangla", number: 301, url: "https://tiger-hub.vercel.app/Star-jalsha/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "starjalsha", name: "Star Jalsha", logo: "https://i.post.img.cc/d1PgMzVF/Star-Jalsha.jpg", category: "Indian Bangla", number: 302, url: "", provider: "STAR"},
+{id: "zeebanglahd1", name: "Zee Bangla HD", logo: "https://i.post.img.cc/QC6LfZkP/Zee-Bangla.jpg", category: "Indian Bangla", number: 303, url: "https://tiger-hub.vercel.app/Zee-bangla/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "zeebanglahd2", name: "Zee Bangla HD", logo: "https://i.post.img.cc/QC6LfZkP/Zee-Bangla.jpg", category: "Indian Bangla", number: 304, url: "https://tvsen3.aynaott.com/PNEb3v2q6GBk/index.m3u8", provider: "TVSEN3"},
+{id: "colorsbanglahd", name: "Colors Bangla HD", logo: "https://i.post.img.cc/LsyGKzFC/Colors-Bangla-HD.jpg", category: "Indian Bangla", number: 305, url: "https://tvsen3.aynaott.com/u3LkNQ7UHhFX/index.m3u8", provider: "TVSEN3"},
+{id: "colorsbanglacinema", name: "Colors Bangla Cinema", logo: "https://i.post.img.cc/KjcC2hkg/Colors-Bangla-Cinema.jpg", category: "Indian Bangla", number: 306, url: "", provider: "COLORS"},
+{id: "sunbanglahd1", name: "Sun Bangla HD", logo: "https://i.post.img.cc/cHRc7hTk/Sun-Bangla.jpg", category: "Indian Bangla", number: 307, url: "https://tiger-hub.vercel.app/Sun-bangla/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sunbanglahd2", name: "Sun Bangla HD", logo: "https://i.post.img.cc/cHRc7hTk/Sun-Bangla.jpg", category: "Indian Bangla", number: 308, url: "https://smart.bengaldigital.live/sun-bangla-paid/index.m3u8", provider: "BENGALDIGITAL"},
+{id: "jalshamovieshd", name: "Jalsha Movies HD", logo: "https://i.post.img.cc/qq07hbRM/Jalsha-Movies-HD.jpg", category: "Indian Bangla", number: 309, url: "https://tiger-hub.vercel.app/Jalsha_movies/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "zeebanglacinema1", name: "Zee Bangla Cinema", logo: "https://i.post.img.cc/DZkPVJfM/Zee-Bangla-Cinema.jpg", category: "Indian Bangla", number: 310, url: "https://tiger-hub.vercel.app/Zee-bangla-Cinema/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "zeebanglacinema2", name: "Zee Bangla Cinema", logo: "https://i.post.img.cc/DZkPVJfM/Zee-Bangla-Cinema.jpg", category: "Indian Bangla", number: 311, url: "https://smart.bengaldigital.live/Zee-Bangla-Cinema/index.m3u8", provider: "BENGALDIGITAL"},
+{id: "abpananda", name: "ABP Ananda", logo: "https://i.post.img.cc/662vVv5x/ABP-Ananda.jpg", category: "Indian Bangla", number: 312, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/abp-ananda/1e4516fa-023a-4807-8e3d-479b346b4a62/2.m3u8", provider: "CLOUDFRONT"},
+{id: "akashaath", name: "Akash Aath", logo: "https://i.post.img.cc/Wbkn7K32/Akash-Aath.jpg", category: "Indian Bangla", number: 313, url: "https://cdn-4.pishow.tv/live/969/969_1.m3u8", provider: "PISHOW"},
+{id: "amarbangla", name: "Amar Bangla", logo: "https://i.post.img.cc/ZRvqBZrC/Amar-Bangla.jpg", category: "Indian Bangla", number: 314, url: "https://live-stream.utkalbongo.com/utkalbongo/stream10/hls/amarbangla.m3u8", provider: "UTKALBONGO"},
+{id: "amarbangladigital", name: "Amar Bangla Digital", logo: "https://i.post.img.cc/Wbkn7K32/Akash-Aath.jpg", category: "Indian Bangla", number: 315, url: "https://live-stream.utkalbongo.com/utkalbongo/stream2/hls/amarbanglatwolivestream.m3u8", provider: "UTKALBONGO"},
+{id: "banglajago", name: "Bangla Jago", logo: "https://i.post.img.cc/MZQcv8Hm/Bangla-Jago.jpg", category: "Indian Bangla", number: 316, url: "http://banglajagotv.livebox.co.in:80/banglajagohls/24x7.m3u8", provider: "LIVEBOX"},
+{id: "ddbangla1", name: "DD Bangla", logo: "https://i.post.img.cc/WzhwJYDJ/DD-Bangla.jpg", category: "Indian Bangla", number: 317, url: "https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/7ff57cc9046b4c188b51a0d506f36e7f/index_3.m3u8", provider: "CLOUDFRONT"},
+{id: "ddbangla2", name: "DD Bangla", logo: "https://i.post.img.cc/WzhwJYDJ/DD-Bangla.jpg", category: "Indian Bangla", number: 318, url: "https://d3eyhgoylams0m.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/ed7bd2c7-8d10-4051-b397-2f6b90f99acb/2e9e32a4-c4f7-49c3-96d6-c4e3660c7e3f/2.m3u8", provider: "CLOUDFRONT"},
+{id: "enter10bangla", name: "Enter 10 Bangla", logo: "https://i.post.img.cc/qvPXDQ68/Enter10-Bangla.jpg", category: "Indian Bangla", number: 319, url: "https://live-bangla.akamaized.net/liveabr/pub-iobanglakp3sff/live_720p/chunks.m3u8", provider: "AKAMAI"},
+{id: "monbangla", name: "Mon Bangla", logo: "https://i.post.img.cc/qvPXDQ68/Enter10-Bangla.jpg", category: "Indian Bangla", number: 320, url: "https://live-stream.utkalbongo.com/utkalbongo/stream7/hls/montvlivestream.m3u8", provider: "UTKALBONGO"},
+{id: "news18bangla", name: "News 18 Bangla", logo: "https://i.post.img.cc/qvPXDQ68/Enter10-Bangla.jpg", category: "Indian Bangla", number: 321, url: "https://amg01448-samsungin-news18bangla-samsungin-ad-qy.amagi.tv/playlist/amg01448-samsungin-news18bangla-samsungin/playlist.m3u8", provider: "AMAGI"},
+{id: "rplusnews", name: "R Plus News", logo: "https://i.post.img.cc/3wPnKf19/Sony-Aath.jpg", category: "Indian Bangla", number: 322, url: "https://thelegitpro.in/pntv/rplusnews24x7/index.m3u8", provider: "LEGITPRO"},
+{id: "sonyaath1", name: "Sony Aath", logo: "https://i.post.img.cc/3wPnKf19/Sony-Aath.jpg", category: "Indian Bangla", number: 323, url: "https://live20.bozztv.com/giatvplayout7/giatv-209611/index.m3u8", provider: "BOZZTV"},
+{id: "sonyaath2", name: "Sony Aath", logo: "https://i.post.img.cc/3wPnKf19/Sony-Aath.jpg", category: "Indian Bangla", number: 324, url: "https://tiger-hub.vercel.app/Sony-aath/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tarabanglacinema", name: "Tara Bangla Cinema", logo: "https://i.post.img.cc/tTNPLBMs/24-Ghanta.jpg", category: "Indian Bangla", number: 325, url: "http://103.145.48.150:90/laosat24/taratv/tracks-v1a1/mono.m3u8", provider: "IPTV"},
+{id: "tv9bangla", name: "TV9 Bangla", logo: "https://i.post.img.cc/tTNPLBMs/24-Ghanta.jpg", category: "Indian Bangla", number: 326, url: "https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9banaen8yq/liveabr/playlist.m3u8", provider: "CLOUDFRONT"},
+{id: "sanandatv1", name: "Sananda TV", logo: "https://i.post.img.cc/cLVryRNp/Sananda-TV.jpg", category: "Indian Bangla", number: 327, url: "https://live.sanonda.tv/sanonda/index.m3u8", provider: "SANONDA"},
+{id: "sanandatv2", name: "Sananda TV", logo: "https://i.post.img.cc/cLVryRNp/Sananda-TV.jpg", category: "Indian Bangla", number: 328, url: "https://smart.bengaldigital.live/Zee-Bangla/index.m3u8", provider: "BENGALDIGITAL"},
+{id: "bhichannel", name: "Bhi Channel", logo: "https://i.post.img.cc/tTNPLBMs/24-Ghanta.jpg", category: "Indian Bangla", number: 329, url: "http://15.235.185.236/hls/bhi.m3u8", provider: "IPTV"},
+{id: "zee24ghanta", name: "Zee 24 Ghanta", logo: "https://i.post.img.cc/tTNPLBMs/24-Ghanta.jpg", category: "Indian Bangla", number: 330, url: "https://d2dsoyvkr33m05.cloudfront.net/index_1.m3u8", provider: "CLOUDFRONT"},
+
+// India Entertainment Channels
+{id: "andpictures", name: "&pictures HD", logo: "https://i.post.img.cc/1R0kx5TF/Pictures-HD.jpg", category: "India", number: 401, url: "http://66.102.120.18:8000/play/a01t", provider: "IPTV"},
+{id: "andtv1", name: "&TV", logo: "https://i.post.img.cc/g0qJLPj6/TV.jpg", category: "India", number: 402, url: "https://tiger-hub.vercel.app/&TV/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "andtv2", name: "&TV", logo: "https://i.post.img.cc/g0qJLPj6/TV.jpg", category: "India", number: 403, url: "http://66.102.120.18:8000/play/a01u", provider: "IPTV"},
+{id: "b4umovies", name: "B4U Movies", logo: "https://i.post.img.cc/rmBYB7GQ/Bhojpuri-Cinema.jpg", category: "India", number: 404, url: "https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/cd1f59d6-9b5d-43f0-bfb2-6ca9edc99f27/0.m3u8", provider: "CLOUDFRONT"},
+{id: "bhojpuricinema", name: "Bhojpuri Cinema", logo: "https://i.post.img.cc/rmBYB7GQ/Bhojpuri-Cinema.jpg", category: "India", number: 405, url: "https://live-bhojpuri.akamaized.net/liveabr/playlist.m3u8", provider: "AKAMAI"},
+{id: "bollywoodclassic", name: "Bollywood Classic HD", logo: "https://i.post.img.cc/rmBYB7GQ/Bhojpuri-Cinema.jpg", category: "India", number: 406, url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/bollywood-classic/manifest.m3u8", provider: "CLOUDFRONT"},
+{id: "colorshd", name: "Colors HD", logo: "https://i.post.img.cc/J4n7YN2D/Colors.jpg", category: "India", number: 407, url: "http://66.102.120.18:8000/play/a00a", provider: "IPTV"},
+{id: "colorscineplexhd", name: "Colors Cineplex HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "India", number: 408, url: "http://66.102.120.18:8000/play/a06z", provider: "IPTV"},
+{id: "colorscineplexbollywood", name: "Colors Cineplex Bollywood", logo: "https://i.post.img.cc/CKg6KVX3/Zee-TV-HD.jpg", category: "India", number: 409, url: "http://66.102.120.18:8000/play/a01a", provider: "IPTV"},
+{id: "colorsrishtey", name: "Colors Rishtey HD", logo: "https://i.post.img.cc/B6z3dyyj/Colors-Rishtey.jpg", category: "India", number: 410, url: "", provider: "COLORS"},
+{id: "dangal", name: "Dangal", logo: "https://i.post.img.cc/J4n7YN2D/Colors.jpg", category: "India", number: 411, url: "https://live-dangal.akamaized.net/liveabr/playlist.m3u8", provider: "AKAMAI"},
+{id: "dangal2", name: "Dangal 2", logo: "https://i.post.img.cc/J4n7YN2D/Colors.jpg", category: "India", number: 412, url: "https://live-dangal2.akamaized.net/liveabr/playlist.m3u8", provider: "AKAMAI"},
+{id: "pardesitv", name: "Pardesi TV", logo: "https://i.post.img.cc/J4n7YN2D/Colors.jpg", category: "India", number: 413, url: "http://stream.pardesitv.online/pardesi/tracks-v1a1/mono.m3u8", provider: "PARDESI"},
+{id: "sonysab1", name: "Sony Sab", logo: "https://i.post.img.cc/yYmcX2Ds/Sony-SAB-HD.jpg", category: "India", number: 414, url: "https://tiger-hub.vercel.app/SONY/SAB/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonysab2", name: "Sony Sab", logo: "https://i.post.img.cc/yYmcX2Ds/Sony-SAB-HD.jpg", category: "India", number: 415, url: "http://66.102.120.18:8000/play/a00d", provider: "IPTV"},
+{id: "sabtv1", name: "Sab TV", logo: "https://i.post.img.cc/yYmcX2Ds/Sony-SAB-HD.jpg", category: "India", number: 416, url: "https://tiger-hub.vercel.app/SONY/SAB/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sabtv2", name: "Sab TV", logo: "https://i.post.img.cc/yYmcX2Ds/Sony-SAB-HD.jpg", category: "India", number: 417, url: "http://66.102.120.18:8000/play/a035", provider: "IPTV"},
+{id: "sonytv1", name: "Sony TV", logo: "https://i.post.img.cc/x1tfkwJb/Sony-TV.jpg", category: "India", number: 418, url: "https://tiger-hub.vercel.app/SONY/Entertainment/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonytv2", name: "Sony TV", logo: "https://i.post.img.cc/x1tfkwJb/Sony-TV.jpg", category: "India", number: 419, url: "https://tiger-hub.vercel.app/SONY/Max/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonytv3", name: "Sony TV", logo: "https://i.post.img.cc/x1tfkwJb/Sony-TV.jpg", category: "India", number: 420, url: "http://66.102.120.18:8000/play/a005", provider: "IPTV"},
+{id: "sonymax2", name: "Sony Max 2", logo: "https://i.post.img.cc/x1tfkwJb/Sony-TV.jpg", category: "India", number: 421, url: "https://tiger-hub.vercel.app/SONY/MaxUK-2/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonywah", name: "Sony Wah", logo: "https://i.post.img.cc/x1tfkwJb/Sony-TV.jpg", category: "India", number: 422, url: "https://tiger-hub.vercel.app/SONY/Wah/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "starbharathd", name: "Star Bharat HD", logo: "https://i.post.img.cc/QCGRcWyM/Star-Bharat-HD.jpg", category: "India", number: 423, url: "http://66.102.120.18:8000/play/a012", provider: "IPTV"},
+{id: "stargoldhd1", name: "Star Gold HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "India", number: 424, url: "http://116.90.120.149:8000/play/a0c2/index.m3u8", provider: "IPTV"},
+{id: "stargoldhd2", name: "Star Gold HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "India", number: 425, url: "http://66.102.120.18:8000/play/a00f", provider: "IPTV"},
+{id: "stargold2hd1", name: "Star Gold 2 HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "India", number: 426, url: "http://116.90.120.149:8000/play/a0ea/index.m3u8", provider: "IPTV"},
+{id: "stargold2hd2", name: "Star Gold 2 HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "India", number: 427, url: "http://66.102.120.18:8000/play/a00g", provider: "IPTV"},
+{id: "stargold2hd3", name: "Star Gold 2 HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "India", number: 428, url: "http://66.102.120.18:8000/play/a077", provider: "IPTV"},
+{id: "stargoldselect", name: "Star Gold Select", logo: "https://i.post.img.cc/4y3qbp5T/Star-Gold-Select-HD.jpg", category: "India", number: 429, url: "", provider: "STAR"},
+{id: "stargoldselecthd", name: "Star Gold Select HD", logo: "https://i.post.img.cc/4y3qbp5T/Star-Gold-Select-HD.jpg", category: "India", number: 430, url: "http://66.102.120.18:8000/play/a01s", provider: "IPTV"},
+{id: "stargoldthrills1", name: "Star Gold Thrills", logo: "https://i.post.img.cc/4y3qbp5T/Star-Gold-Select-HD.jpg", category: "India", number: 431, url: "http://116.90.120.149:8000/play/a0c0/index.m3u8", provider: "IPTV"},
+{id: "stargoldthrills2", name: "Star Gold Thrills", logo: "https://i.post.img.cc/4y3qbp5T/Star-Gold-Select-HD.jpg", category: "India", number: 432, url: "http://66.102.120.18:8000/play/a00c", provider: "IPTV"},
+{id: "starplushd1", name: "Star Plus HD", logo: "https://i.post.img.cc/43WkCMMz/Star-Plus.jpg", category: "India", number: 433, url: "http://116.90.120.149:8000/play/a0b9/index.m3u8", provider: "IPTV"},
+{id: "starplushd2", name: "STAR Plus HD", logo: "https://i.post.img.cc/43WkCMMz/Star-Plus.jpg", category: "India", number: 434, url: "http://66.102.120.18:8000/play/a008", provider: "IPTV"},
+{id: "starutsav", name: "Star Utsav SD", logo: "https://i.post.img.cc/43WkCMMz/Star-Plus.jpg", category: "India", number: 435, url: "http://116.90.120.149:8000/play/a02t/index.m3u8", provider: "IPTV"},
+{id: "starutsavmovies", name: "Star Utsav Movies SD", logo: "https://i.post.img.cc/43WkCMMz/Star-Plus.jpg", category: "India", number: 436, url: "http://116.90.120.149:8000/play/a02r/index.m3u8", provider: "IPTV"},
+{id: "zeeaction", name: "Zee Action", logo: "https://i.post.img.cc/Vvfy53T4/Zee-Action.jpg", category: "India", number: 437, url: "", provider: "ZEE"},
+{id: "zeebollywood", name: "Zee Bollywood", logo: "https://i.post.img.cc/c4hjk9jG/Zee-Anmol.jpg", category: "India", number: 438, url: "http://66.102.120.18:8000/play/a00n", provider: "IPTV"},
+{id: "zeecinemahd1", name: "Zee Cinema HD", logo: "https://i.post.img.cc/NMwyVdy7/Zee-Cinema-HD.jpg", category: "India", number: 439, url: "http://smart.bengaldigital.live/ZeeCinema/index.m3u8", provider: "BENGALDIGITAL"},
+{id: "zeecinemahd2", name: "Zee Cinema HD", logo: "https://i.post.img.cc/NMwyVdy7/Zee-Cinema-HD.jpg", category: "India", number: 440, url: "http://66.102.120.18:8000/play/a06w", provider: "IPTV"},
+{id: "zeetvhd", name: "Zee TV HD", logo: "https://i.post.img.cc/CKg6KVX3/Zee-TV-HD.jpg", category: "India", number: 441, url: "http://66.102.120.18:8000/play/a00y", provider: "IPTV"},
+{id: "zeeanmolcinema", name: "Zee Anmol Cinema", logo: "https://i.post.img.cc/CKg6KVX3/Zee-TV-HD.jpg", category: "India", number: 442, url: "http://66.102.120.18:8000/play/a01v", provider: "IPTV"},
+{id: "zeeclassic", name: "Zee Classic", logo: "https://i.post.img.cc/CKg6KVX3/Zee-TV-HD.jpg", category: "India", number: 443, url: "http://66.102.120.18:8000/play/a006", provider: "IPTV"},
+
+// Music Channels
+{id: "9xjalwa1", name: "9X Jalwa", logo: "https://i.post.img.cc/2S9YWq3f/9X-Jalwa.jpg", category: "Music", number: 501, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/9x-jalwa/3c0a4ee4-fdd7-4bb8-9b36-60a3e7861edc/3.m3u8", provider: "CLOUDFRONT"},
+{id: "9xjalwa2", name: "9X Jalwa", logo: "https://i.post.img.cc/2S9YWq3f/9X-Jalwa.jpg", category: "Music", number: 502, url: "https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/70fca4d1-156e-4c03-baa4-9a4b602e33d5/0.m3u8", provider: "CLOUDFRONT"},
+{id: "9xjhakaas", name: "9X Jhakaas", logo: "https://i.post.img.cc/154N6F39/9-X-Jhakaas.jpg", category: "Music", number: 503, url: "https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/ec26ed6c-3d9d-47d3-ac70-d23e781adbdf/0.m3u8", provider: "CLOUDFRONT"},
+{id: "9xmusic", name: "9X Music", logo: "https://i.post.img.cc/RZJmcSt6/9XM.jpg", category: "Music", number: 504, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/9xm/23886666-8fc5-470f-aab1-bd637ed607b1/3.m3u8", provider: "CLOUDFRONT"},
+{id: "9xtashan", name: "9X Tashan", logo: "https://i.post.img.cc/RZJmcSt6/9XM.jpg", category: "Music", number: 505, url: "https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/c18ba53f-d825-4f26-971c-65ec6ab892cc/0.m3u8", provider: "CLOUDFRONT"},
+{id: "abmasti", name: "AB Masti", logo: "https://i.post.img.cc/HxPhL5Lr/Showven.jpg", category: "Music", number: 506, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/mastiii/5cb452da-afcf-4047-8141-2673d61ba23d/3.m3u8", provider: "CLOUDFRONT"},
+{id: "atnmusic", name: "ATN Music", logo: "https://i.post.img.cc/tC3qfCTK/ATN-Music.jpg", category: "Bangla Music", number: 507, url: "https://app24.jagobd.com.bd/c3VydmVyX8RpbEU9Mi8xNy8yMFDDEHGcfRgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcEdsEfeDeKiNkVN3PTOmdFsaWRtaW51aiPhnPTI2/atnmusic.stream/mono.m3u8", provider: "JAGOBD"},
+{id: "b4umusic1", name: "B4U Music", logo: "https://i.post.img.cc/MGP3pRsh/Balle-Balle.jpg", category: "Music", number: 508, url: "https://d3kdywbtdfbp9z.cloudfront.net/v1/manifest/93ce20f0f52760bf38be911ff4c91ed02aa2fd92/dff423e0-3c82-46d6-9ecb-3baa96b5694a/de456a2b-b6f5-4afe-a222-5d2d6e885526/0.m3u8", provider: "CLOUDFRONT"},
+{id: "b4umusic2", name: "B4u Music", logo: "https://i.post.img.cc/MGP3pRsh/Balle-Balle.jpg", category: "Music", number: 509, url: "http://45.143.220.6:3333/live/premium-aostv-free/download-fdrm-aostv.asia/2762.ts", provider: "AOSTV"},
+{id: "balleballe", name: "Balle Balle", logo: "https://i.post.img.cc/MGP3pRsh/Balle-Balle.jpg", category: "Music", number: 510, url: "https://mcncdndigital.com/balleballetv/index.m3u8", provider: "MCNCDN"},
+{id: "barazamusic1", name: "Baraza Music TV", logo: "https://i.imgur.com/rEhhYpe.png", category: "Music", number: 511, url: "https://rtmp.streams.ovh:1936/barazarelax/barazazararelax/barazarelax/playlist.m3u8", provider: "STREAMSOVH"},
+{id: "barazamusic2", name: "Baraza Music TV", logo: "https://i.imgur.com/rEhhYpe.png", category: "Music", number: 512, url: "https://eco.streams.ovh:8081/barazatv/index.m3u8", provider: "STREAMSOVH"},
+{id: "bollywoodclassicmusic", name: "Bollywood Classic", logo: "https://i.imgur.com/rEhhYpe.png", category: "Music", number: 513, url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/bollywood-classic/manifest.m3u8", provider: "CLOUDFRONT"},
+{id: "hindihits", name: "Hindi Hits HD", logo: "https://i.post.img.cc/tC3qfCTK/ATN-Music.jpg", category: "Music", number: 514, url: "http://146.59.253.52:8080/hindihitshd/index.m3u8", provider: "IPTV"},
+{id: "hulchaltv", name: "Hulchal TV", logo: "https://i.post.img.cc/tC3qfCTK/ATN-Music.jpg", category: "Music", number: 515, url: "http://cdn12.henico.net:8080/live/jbani/index.m3u8", provider: "HENICO"},
+{id: "joomusic", name: "Joo Music", logo: "https://i.imgur.com/MkFsM39.png", category: "Music", number: 516, url: "https://livecdn.live247stream.com/joomusic/tv/playlist.m3u8", provider: "LIVE247"},
+{id: "lovedoes", name: "Love Does", logo: "https://i.imgur.com/MkFsM39.png", category: "Music", number: 517, url: "https://live20.bozztv.com/giatvplayout7/giatv-209587/index.m3u8", provider: "BOZZTV"},
+{id: "mtv", name: "MTV", logo: "https://i.imgur.com/MkFsM39.png", category: "Music", number: 518, url: "https://tiger-hub.vercel.app/Mtv-music_hollywood/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "musictv", name: "Music TV", logo: "https://i.post.img.cc/RZJmcSt6/9XM.jpg", category: "Music", number: 519, url: "http://bitcdn-kronehit.bitmovin.com/v2/hls/chunklist_b3128000.m3u8", provider: "BITMOVIN"},
+{id: "sagamusic", name: "Saga Music", logo: "https://i.post.img.cc/pLG976s5/Sangeet-Bangla.jpg", category: "Music", number: 520, url: "https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c26c7309312/saga-music/5e027b28-fb0e-49cc-9962-44babcc450ce/0.m3u8", provider: "CLOUDFRONT"},
+{id: "sangeetbangla1", name: "Sangeet Bangla", logo: "https://i.post.img.cc/pLG976s5/Sangeet-Bangla.jpg", category: "Bangla Music", number: 521, url: "https://tiger-hub.vercel.app/Sangeet-Bangla/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sangeetbangla2", name: "Sangeet Bangla", logo: "https://i.post.img.cc/pLG976s5/Sangeet-Bangla.jpg", category: "Bangla Music", number: 522, url: "http://45.143.220.6:3333/live/premium-aostv-free/download-fdrm-aostv.asia/2906.ts", provider: "AOSTV"},
+{id: "wion", name: "WION", logo: "https://i.post.img.cc/MGP3pRsh/Balle-Balle.jpg", category: "Music", number: 523, url: "https://d7x8z4yuq42qn.cloudfront.net/index_1.m3u8", provider: "CLOUDFRONT"},
+{id: "yrfmusic", name: "YRF Music", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 524, url: "https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01412-xiaomiasia-yrfmusic-xiaomi/playlist.m3u8", provider: "AMAGI"},
+{id: "30amusic", name: "30A Music", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 525, url: "https://30a-tv.com/music.m3u8", provider: "30ATV"},
+{id: "8xmhd", name: "8XM HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 526, url: "http://66.102.120.18:8000/play/a050", provider: "IPTV"},
+{id: "arymusic", name: "ARY Music", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 527, url: "http://66.102.120.18:8000/play/a036", provider: "IPTV"},
+{id: "jalwahd", name: "JALWA HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 528, url: "http://66.102.120.18:8000/play/a052", provider: "IPTV"},
+{id: "mifamusic", name: "MIFA MUSIC HD", logo: "https://i.post.img.cc/RhgbbqFx/Star-Gold.jpg", category: "Music", number: 529, url: "http://66.102.120.18:8000/play/a046", provider: "IPTV"},
+
+// Kids Channels
+{id: "angrybird", name: "Angry Bird", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 601, url: "https://tiger-hub.vercel.app/kids_Zone/Angry-birds/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "angrybirdblue", name: "Angry Bird Blue", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 602, url: "https://tiger-hub.vercel.app/kids_Zone/Angry-birds--Blue/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "durontotv", name: "Duronto TV", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 603, url: "https://tvsen4.aynaott.com/durontotv/index.m3u8", provider: "TVSEN4"},
+{id: "rongeentv", name: "Rongeen TV", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 604, url: "https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8", provider: "LEGITPRO"},
+{id: "bbccbeebies", name: "BBC Cbeebies", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 605, url: "https://live20.bozztv.com/giatvplayout7/giatv-209622/index.m3u8", provider: "BOZZTV"},
+{id: "cartoonnetwork1", name: "Cartoon Network", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 606, url: "https://live20.bozztv.com/giatvplayout7/giatv-209624/index.m3u8", provider: "BOZZTV"},
+{id: "cartoonnetwork2", name: "Cartoon Network", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 607, url: "https://vodzong.mjunoon.tv:8087/streamtest/cartoon-network-87/playlist.m3u8", provider: "MJUNOON"},
+{id: "cartoonnetwork3", name: "Cartoon Network", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 608, url: "http://78.108.251.7/Cartoon_Network/index.m3u8", provider: "IPTV"},
+{id: "cartoonnetwork4", name: "Cartoon Network", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 609, url: "http://66.102.120.18:8000/play/a00t", provider: "IPTV"},
+{id: "cartoonnetwork5", name: "Cartoon Network", logo: "https://i.post.img.cc/d3j5T2F8/Cartoon-Network.jpg", category: "Kids", number: 610, url: "http://66.102.120.18:8000/play/a011", provider: "IPTV"},
+{id: "discoveryfamily", name: "Discovery Family Channel", logo: "https://i.post.img.cc/gjZzG3WD/Fight-Network.jpg", category: "Kids", number: 611, url: "http://212.102.60.10/DISCOVERY_FAMILY_CHANNEL/index.m3u8", provider: "IPTV"},
+{id: "discoverykids1", name: "Discovery Kids", logo: "https://i.post.img.cc/gjZzG3WD/Fight-Network.jpg", category: "Kids", number: 612, url: "https://live20.bozztv.com/giatvplayout7/giatv-209633/index.m3u8", provider: "BOZZTV"},
+{id: "discoverykids2", name: "Discovery Kids", logo: "https://i.post.img.cc/gjZzG3WD/Fight-Network.jpg", category: "Kids", number: 613, url: "http://66.102.120.18:8000/play/a00k", provider: "IPTV"},
+{id: "discoverykids3", name: "Discovery Kids", logo: "https://i.post.img.cc/gjZzG3WD/Fight-Network.jpg", category: "Kids", number: 614, url: "https://dplus.gammacdn.workers.dev/videos/113.m3u8", provider: "WORKERS"},
+{id: "ducktv1", name: "Duck TV", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 615, url: "https://d2lmgfyblo9rak.cloudfront.net/playlist.m3u8", provider: "CLOUDFRONT"},
+{id: "ducktv2", name: "DuckTV", logo: "https://i.post.img.cc/zBCLNtGZ/Duronto.jpg", category: "Kids", number: 616, url: "http://78.108.251.7/DuckTV/index.m3u8", provider: "IPTV"},
+{id: "disneyjunior1", name: "Disney Junior", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 617, url: "http://78.108.251.7/Disney_Junior/index.m3u8", provider: "IPTV"},
+{id: "boomerang1", name: "Boomerang", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 618, url: "http://78.108.251.7/Boomerang/index.m3u8", provider: "IPTV"},
+{id: "nickjr1", name: "Nick Jr", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 619, url: "http://78.108.251.7/Nick_Jr/index.m3u8", provider: "IPTV"},
+{id: "disneychannelsd", name: "Disney Channel SD", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 620, url: "http://116.90.120.149:8000/play/a0bx/index.m3u8", provider: "IPTV"},
+{id: "disneyinternational", name: "Disney International HD", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 621, url: "http://66.102.120.18:8000/play/a078", provider: "IPTV"},
+{id: "disneyjunior2", name: "Disney Junior", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 622, url: "http://66.102.120.18:8000/play/a004", provider: "IPTV"},
+{id: "disny", name: "Disny", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 623, url: "http://66.102.120.18:8000/play/a070", provider: "IPTV"},
+{id: "grizzy", name: "Grizzy & the Lemmings", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 624, url: "https://tiger-hub.vercel.app/kids_Zone/Grizzy&the-Lemmings/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "kidzonepakistan", name: "Kidzone Pakistan", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 625, url: "http://66.102.120.18:8000/play/a02l", provider: "IPTV"},
+{id: "larva", name: "Larva", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 626, url: "https://tiger-hub.vercel.app/kids_Zone/Larva/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "mashabear", name: "Masha & the Bear", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 627, url: "https://tiger-hub.vercel.app/kids_Zone/Marsha&theBear/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "mightybhim", name: "Mighty Little Bhim", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 628, url: "https://tiger-hub.vercel.app/kids_Zone/Mighty-Little-Bim/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "minimax", name: "MINIMAX 2", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 629, url: "http://66.102.120.18:8000/play/a04o", provider: "IPTV"},
+{id: "nick1", name: "Nick", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 630, url: "http://66.102.120.18:8000/play/a00w", provider: "IPTV"},
+{id: "nickhd", name: "Nick HD+", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 631, url: "http://66.102.120.18:8000/play/a07a", provider: "IPTV"},
+{id: "nickjr2", name: "Nick Jr.", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 632, url: "http://66.102.120.18:8000/play/a00m", provider: "IPTV"},
+{id: "planetfun", name: "Planet Fun HD", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 633, url: "http://66.102.120.18:8000/play/a02k", provider: "IPTV"},
+{id: "pogo1", name: "Pogo", logo: "https://i.post.img.cc/FFwSjdzS/Pogo.jpg", category: "Kids", number: 634, url: "http://66.102.120.18:8000/play/a00l", provider: "IPTV"},
+{id: "sonyyay1", name: "SONY YAY", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 635, url: "http://66.102.120.18:8000/play/a00s", provider: "IPTV"},
+{id: "sonic", name: "Sonic", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 636, url: "http://66.102.120.18:8000/play/a00p", provider: "IPTV"},
+{id: "disneychannel", name: "Disney Channel", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 637, url: "http://103.182.170.32:8888/play/a04g", provider: "IPTV"},
+{id: "ekids", name: "EKids", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 638, url: "http://78.108.251.7/EKids/index.m3u8", provider: "IPTV"},
+{id: "babytv", name: "BabyTV", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 639, url: "http://78.108.251.7/BabyTV/index.m3u8", provider: "IPTV"},
+{id: "mickymouse", name: "Micky Mouse", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 640, url: "https://tiger-hub.vercel.app/kids_Zone/Micky-mouse/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "nicktoons", name: "NickToons", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 641, url: "http://78.108.251.7/NickToons/index.m3u8", provider: "IPTV"},
+{id: "nick2", name: "Nick", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 642, url: "http://fl1.moveonjoy.com/NICKELODEON/index.m3u8", provider: "MOVEONJOY"},
+{id: "pbskids", name: "PBS Kids", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 643, url: "https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8", provider: "STREAMHOSTER"},
+{id: "pinkpanther", name: "Pink Panther", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 644, url: "https://tiger-hub.vercel.app/kids_Zone/Pink-Panther/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "shaunsheep", name: "Shaun the Sheep", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 645, url: "https://tiger-hub.vercel.app/kids_Zone/Shaun-the-sheep/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonyyay2", name: "Sony Yay", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 646, url: "https://tiger-hub.vercel.app/SONY/YAY/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "spidermankids", name: "Spiderman Kids", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 647, url: "https://tiger-hub.vercel.app/kids_Zone/Spiderman-kids/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "tomjerry", name: "Tom & Jerry", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 648, url: "https://tiger-hub.vercel.app/kids_Zone/Tom&Jerry/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "zoomoo", name: "Zoo Moo", logo: "https://i.imgur.com/ubZMeQv.jpg", category: "Kids", number: 649, url: "https://zoomoo-samsungau.amagi.tv/playlist.m3u8", provider: "AMAGI"},
+
+// Radio Channels
+{id: "rootsair", name: "ROOTS AIR", logo: "", category: "Radio", number: 701, url: "https://sslive.zeilsteen.com/;", provider: "ZEILSTEEN"},
+{id: "radiobongo", name: "RADIO BONGO", logo: "", category: "Radio", number: 702, url: "https://stream.bongonet.net/proxy/radiobongonet?mp=/stream/1/", provider: "BONGONET"},
+{id: "goyesteryears", name: "GO YESTERYEARS", logo: "", category: "Radio", number: 703, url: "https://stream-163.zeno.fm/15wnypt6by8uv?zs=E6oAIy23RDijnCznNkGngw", provider: "ZENO"},
+{id: "robichaya", name: "ROBI CHAYA", logo: "", category: "Radio", number: 704, url: "https://stream.bongonet.net/proxy/robichhaya?mp=/stream/1/", provider: "BONGONET"},
+{id: "monophone", name: "MONO PHONE", logo: "", category: "Radio", number: 705, url: "https://stream.bongonet.net/proxy/monophone?mp=/stream/1/", provider: "BONGONET"},
+{id: "radiokolkata", name: "RADIO KOLKATA", logo: "", category: "Radio", number: 706, url: "https://stream.bongonet.net/proxy/discobanikolkata?mp=/stream/1/", provider: "BONGONET"},
+{id: "radioabirvab", name: "RADIO ABIRVAB", logo: "", category: "Radio", number: 707, url: "https://stream-152.zeno.fm/yxc3k2pxyrquv?zs=gznr8wJISzq6ErXp3gyovg", provider: "ZENO"},
+{id: "radiobushra", name: "RADIO BUSHRA", logo: "", category: "Radio", number: 708, url: "https://stream-150.zeno.fm/mzuka1fdxzzuv?zs=pXvETkWgSPubDoMrhbMg0Q", provider: "ZENO"},
+{id: "capitalfm", name: "CAPITAL FM", logo: "", category: "Radio", number: 709, url: "https://stream-156.zeno.fm/4nzaapqw34zuv?zs=8ulSXD48T0iu9j_b5sqFNQ", provider: "ZENO"},
+{id: "betartorongo", name: "BETAR TORONGO", logo: "", category: "Radio", number: 710, url: "https://stream-151.zeno.fm/v7tnp975wqzuv?zs=FLSGvttXQn-TMaa14eXueA", provider: "ZENO"},
+{id: "dhakafm", name: "DHAKA FM", logo: "", category: "Radio", number: 711, url: "https://stream-161.zeno.fm/u9mphfk604zuv?zs=adD8_fLrT5yTo2oMDjMiPQ", provider: "ZENO"},
+{id: "radiogoongoon", name: "RADIO GOONGOON", logo: "", category: "Radio", number: 712, url: "https://audio.streamcast.xyz/radio/8000/radio.mp3", provider: "STREAMCAST"},
+{id: "peoplesradio", name: "PEOPLES RADIO", logo: "", category: "Radio", number: 713, url: "https://s3.myradiostream.com:14498/;", provider: "MYRADIOSTREAM"},
+{id: "radiotoday", name: "RADIO TODAY", logo: "", category: "Radio", number: 714, url: "https://stream-147.zeno.fm/0zha3rfq02quv?zs=rDOxnyLeQSOiRvLte2dqEQ", provider: "ZENO"},
+{id: "radiofoorti", name: "RADIO FOORTI", logo: "", category: "Radio", number: 715, url: "https://stream-152.zeno.fm/cwa3vg8s8druv?zs=9jTU7o8sRi6FKLiV4E_BLQ", provider: "ZENO"},
+{id: "radiopadma", name: "RADIO PADMA", logo: "", category: "Radio", number: 716, url: "https://radiopadmabd.radioca.st/stream/1/", provider: "RADIOCAST"},
+
+// Others/Islamic/Religious Channels
+{id: "quran", name: "Quran", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 801, url: "http://164.215.98.132:2082/8649G54859/8649G54859/7217", provider: "IPTV"},
+{id: "ilmtv", name: "Ilm TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 802, url: "https://cloudfrontnet.vercel.app/tplay/playout/209617/master.m3u8", provider: "CLOUDFRONT"},
+{id: "deentv", name: "Deen TV UK", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 803, url: "https://ap02.iqplay.tv:8082/iqb8002/d33ntv/playlist.m3u8", provider: "IQPLAY"},
+{id: "peacetvbangla", name: "Peace TV Bangla", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 804, url: "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/index.m3u8", provider: "ERBVR"},
+{id: "eman", name: "Eman", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 805, url: "https://ap02.iqplay.tv:8082/iqb8002/3m9n/playlist.m3u8", provider: "IQPLAY"},
+{id: "tvone", name: "TV One", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 806, url: "https://ap02.iqplay.tv:8082/iqb8002/tv01/playlist.m3u8", provider: "IQPLAY"},
+{id: "iqrabangla", name: "Iqra Bangla", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 807, url: "https://ap02.iqplay.tv:8082/iqb8002/iq53la/chunks.m3u8", provider: "IQPLAY"},
+{id: "taqbeertv", name: "Taqbeer TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 808, url: "https://ap02.iqplay.tv:8082/iqb8002/t5kb86/playlist.m3u8", provider: "IQPLAY"},
+{id: "madanichannel", name: "Madani Channel Bangla", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 809, url: "https://ap02.iqplay.tv:8082/iqb8002/m@d@n1ch@nn3lb@ngl@/playlist.m3u8", provider: "IQPLAY"},
+{id: "islamtv", name: "Islam TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 810, url: "https://ap02.iqplay.tv:8082/iqb8002/i6sl9m/playlist.m3u8", provider: "IQPLAY"},
+{id: "makkatv", name: "Makka TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 811, url: "https://media2.streambrothers.com:1936/8122/8122/playlist.m3u8", provider: "STREAMBROTHERS"},
+{id: "qtv", name: "QTV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 812, url: "https://ap02.iqplay.tv:8082/iqb8002/@ryq7vtv/chunks.m3u8", provider: "IQPLAY"},
+{id: "sanskartv", name: "Sanskar TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 813, url: "https://d26idhjf0y1p2g.cloudfront.net/out/v1/cd66dd25b9774cb29943bab54bbf3e2f/index.m3u8", provider: "CLOUDFRONT"},
+{id: "redbulltv", name: "Redbull TV", logo: "https://i.post.img.cc/nrz1NpPV/Red-Bull-TV.jpg", category: "Others", number: 814, url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_3360.m3u8", provider: "AKAMAI"},
+{id: "discoverybangla", name: "Discovery Bangla HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 815, url: "https://tiger-hub.vercel.app/Discovery-Bangla/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "discoveryhd1", name: "Discovery HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 816, url: "http://78.108.251.7/Discovery_HD/index.m3u8", provider: "IPTV"},
+{id: "discoveryhd2", name: "Discovery HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 817, url: "http://151.80.18.177:86/Discovery_HD/index.m3u8", provider: "IPTV"},
+{id: "histoire", name: "Histoire HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 818, url: "http://151.80.18.177:86/Histoire/index.m3u8", provider: "IPTV"},
+{id: "sonybbcearth", name: "Sony BBC Earth", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 819, url: "https://tiger-hub.vercel.app/SONY/BBC_Earth/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "travelclub", name: "Travel Club", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 820, url: "https://network24.live:4433/Travelclub/tracks-v1a1/mono.m3u8", provider: "NETWORK24"},
+{id: "tf1hd", name: "TF1 HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 821, url: "http://151.80.18.177:86/TF1_HD/index.m3u8", provider: "IPTV"},
+{id: "rtl9hd", name: "RTL9 HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 822, url: "http://151.80.18.177:86/RTL9/index.m3u8", provider: "IPTV"},
+{id: "sonymovies", name: "Sony Movies", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Movies", number: 823, url: "https://tiger-hub.vercel.app/SONY/MoviesUK/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "sonypix", name: "Sony Pix", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Movies", number: 824, url: "https://tiger-hub.vercel.app/SONY/Pix/tracks-v1a1/mono.ts.m3u8", provider: "TIGERHUB"},
+{id: "bbc", name: "BBC", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 825, url: "http://78.108.251.7/BBC/index.m3u8", provider: "IPTV"},
+{id: "cnn1", name: "CNN HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 826, url: "http://78.108.251.7/CNN/index.m3u8", provider: "IPTV"},
+{id: "cnn2", name: "CNN HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 827, url: "https://amg01448-samsungin-cnnnow-samsungin-4npqg.amagi.tv/playlist/amg01448-samsungin-cnnnow-samsungin/playlist.m3u8", provider: "AMAGI"},
+{id: "rtvi", name: "RTVi", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 828, url: "http://78.108.251.7/RTVi/index.m3u8", provider: "IPTV"},
+{id: "travelchannel", name: "Travel Channel HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 829, url: "http://78.108.251.7/Travel_Channel_HD/index.m3u8", provider: "IPTV"},
+{id: "andflix", name: "&flix HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Movies", number: 830, url: "http://66.102.120.18:8000/play/a022", provider: "IPTV"},
+{id: "24newshd", name: "24 News HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 831, url: "http://66.102.120.18:8000/play/a04v", provider: "IPTV"},
+{id: "24bhd", name: "24B HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 832, url: "http://66.102.120.18:8000/play/a044", provider: "IPTV"},
+{id: "365news", name: "365 NEWS", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 833, url: "http://66.102.120.18:8000/play/a039", provider: "IPTV"},
+{id: "92entertainment", name: "92 Entertainment", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 834, url: "http://66.102.120.18:8000/play/a06m", provider: "IPTV"},
+{id: "92newshd", name: "92 News HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 835, url: "http://66.102.120.18:8000/play/a04y", provider: "IPTV"},
+{id: "a1tv", name: "A1 TV", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 836, url: "http://66.102.120.18:8000/play/a04q", provider: "IPTV"},
+{id: "aajentertainment", name: "AAJ ENTERTANMENT", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 837, url: "http://66.102.120.18:8000/play/a05b", provider: "IPTV"},
+{id: "aantv", name: "AAN TV", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 838, url: "http://66.102.120.18:8000/play/a05j", provider: "IPTV"},
+{id: "abbtakkhd", name: "ABBTAKK HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 839, url: "http://66.102.120.18:8000/play/a051", provider: "IPTV"},
+{id: "aiknews", name: "AIK NEWS", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 840, url: "http://66.102.120.18:8000/play/a03d", provider: "IPTV"},
+{id: "apnachannel", name: "APNA CHANNEL HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 841, url: "http://66.102.120.18:8000/play/a04z", provider: "IPTV"},
+{id: "apluspakistan", name: "A Plus Pakistan", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 842, url: "http://66.102.120.18:8000/play/a03c", provider: "IPTV"},
+{id: "arydigitalasia", name: "ARY DigitalAsia HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 843, url: "http://66.102.120.18:8000/play/a030", provider: "IPTV"},
+{id: "arynewsasia", name: "ARY News Asia", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 844, url: "http://66.102.120.18:8000/play/a02z", provider: "IPTV"},
+{id: "aryqtv", name: "ARYQ TV", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 845, url: "http://66.102.120.18:8000/play/a014", provider: "IPTV"},
+{id: "aryzindagi", name: "ARY Zindagi", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 846, url: "http://66.102.120.18:8000/play/a031", provider: "IPTV"},
+{id: "axn", name: "AXN", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 847, url: "http://66.102.120.18:8000/play/a06i", provider: "IPTV"},
+{id: "aljazeera", name: "Al Jazeera English HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 848, url: "http://66.102.120.18:8000/play/a015", provider: "IPTV"},
+{id: "animalplanet", name: "Animal Planet HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Adventure", number: 849, url: "http://66.102.120.18:8000/play/a00o", provider: "IPTV"},
+{id: "bbcnews", name: "BBC News", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 850, url: "http://66.102.120.18:8000/play/a074", provider: "IPTV"},
+{id: "bolnews", name: "BOL News Urdu", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 851, url: "http://66.102.120.18:8000/play/a038", provider: "IPTV"},
+{id: "city21", name: "CITY-21", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 852, url: "http://66.102.120.18:8000/play/a05z", provider: "IPTV"},
+{id: "city42", name: "CITY-42 HD", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "Others", number: 853, url: "http://66.102.120.18:8000/play/a05x", provider: "IPTV"},
+{id: "cnninternational", name: "CNN International", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 854, url: "http://66.102.120.18:8000/play/a017", provider: "IPTV"},
+{id: "capitaltv", name: "Capital TV", logo: "https://i.post.img.cc/xjPwbDSS/RTA-Sport.jpg", category: "News", number: 855, url: "http://66.102.120.18:8000/play/a02y", provider: "IPTV"},
+			  
+              
+            ];
+
+            // Initialize the app
+            function init() {
+                // Load channels from the data
+                loadAllChannels();
+                
+                updateStats();
+                renderCategories();
+                renderFeaturedChannels();
+                renderChannels();
+                setupEventListeners();
+            }
+
+            // Load channels from the data array
+            function loadAllChannels() {
+                allChannels = channelData;
+                filteredChannels = [...allChannels];
+            }
+
+            // Update statistics
+            function updateStats() {
+                const categories = new Set(allChannels.map(channel => channel.category));
+                totalChannels.textContent = `${allChannels.length} Channels`;
+                totalCategories.textContent = `${categories.size} Categories`;
+            }
+
+            // Render category buttons
+            function renderCategories() {
+                const categories = ['ALL', ...new Set(allChannels.map(channel => channel.category))];
+                
+                categoriesContainer.innerHTML = categories.map(category => {
+                    const icon = getCategoryIcon(category);
+                    return `
+                        <button class="category-btn ${category === 'ALL' ? 'active' : ''}" data-category="${category}">
+                            ${icon} ${category}
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            // Get appropriate icon for each category
+            function getCategoryIcon(category) {
+                const icons = {
+                    'ALL': 'fas fa-globe',
+                    "ICC Women's World Cup": 'fas fa-trophy',
+                    'Live Sports': 'fas fa-running',
+                    'Bangla Entertainment': 'fas fa-tv',
+                    'Bangla News': 'fas fa-newspaper',
+                    'Bangla Music': 'fas fa-music'
+                };
+                
+                return `<i class="${icons[category] || 'fas fa-tv'}"></i>`;
+            }
+
+            // Render featured channels
+            function renderFeaturedChannels() {
+                const featuredChannels = allChannels.filter(channel => channel.featured);
+                
+                if (featuredChannels.length === 0) {
+                    // If no featured channels, show first 6 channels
+                    const displayChannels = allChannels.slice(0, 6);
+                    featuredChannelsContainer.innerHTML = displayChannels.map(channel => `
+                        <div class="channel-card" data-id="${channel.id}">
+                            <div class="channel-card-img">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <span class="live-badge">LIVE</span>
+                            </div>
+                            <div class="channel-card-content">
+                                <h3>${channel.name}</h3>
+                                <p>${channel.category}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    featuredChannelsContainer.innerHTML = featuredChannels.map(channel => `
+                        <div class="channel-card" data-id="${channel.id}">
+                            <div class="channel-card-img">
+                                <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                                <span class="live-badge">FEATURED</span>
+                            </div>
+                            <div class="channel-card-content">
+                                <h3>${channel.name}</h3>
+                                <p>${channel.category}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Render channels based on active category and search
+            function renderChannels() {
+                if (filteredChannels.length === 0) {
+                    channelsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-tv"></i>
+                            <h3>No channels found</h3>
+                            <p>Try a different search term or category</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                channelsContainer.innerHTML = filteredChannels.map(channel => `
+                    <div class="channel-card" data-id="${channel.id}">
+                        <div class="channel-card-img">
+                            <img src="${channel.logo}" alt="${channel.name}" onerror="this.src='https://via.placeholder.com/100x60?text=TV'">
+                            ${channel.featured ? '<span class="live-badge">FEATURED</span>' : '<span class="live-badge">LIVE</span>'}
+                        </div>
+                        <div class="channel-card-content">
+                            <h3>${channel.name}</h3>
+                            <p>${channel.category} • Ch ${channel.number}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Filter channels by category
+            function filterByCategory(category) {
+                activeCategory = category;
+                
+                if (category === 'ALL') {
+                    filteredChannels = [...allChannels];
+                } else {
+                    filteredChannels = allChannels.filter(channel => channel.category === category);
+                }
+                
+                // Apply search filter if there's a search term
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                if (searchTerm) {
+                    filteredChannels = filteredChannels.filter(channel => 
+                        channel.name.toLowerCase().includes(searchTerm) || 
+                        channel.category.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                renderChannels();
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Category filter
+                categoriesContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('category-btn') || e.target.closest('.category-btn')) {
+                        const categoryBtn = e.target.classList.contains('category-btn') ? 
+                            e.target : e.target.closest('.category-btn');
+                        
+                        // Update active category button
+                        document.querySelectorAll('.category-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        categoryBtn.classList.add('active');
+                        
+                        // Filter channels
+                        const category = categoryBtn.dataset.category;
+                        filterByCategory(category);
+                    }
+                });
+                
+                // Channel selection
+                channelsContainer.addEventListener('click', (e) => {
+                    const channelCard = e.target.closest('.channel-card');
+                    if (channelCard) {
+                        const channelId = channelCard.dataset.id;
+                        const channel = allChannels.find(c => c.id === channelId);
+                        
+                        if (channel) {
+                            playChannel(channel);
+                        }
+                    }
+                });
+
+                // Featured channel selection
+                featuredChannelsContainer.addEventListener('click', (e) => {
+                    const channelCard = e.target.closest('.channel-card');
+                    if (channelCard) {
+                        const channelId = channelCard.dataset.id;
+                        const channel = allChannels.find(c => c.id === channelId);
+                        
+                        if (channel) {
+                            playChannel(channel);
+                        }
+                    }
+                });
+                
+                // Search functionality
+                searchInput.addEventListener('input', () => {
+                    const searchTerm = searchInput.value.trim().toLowerCase();
+                    
+                    if (activeCategory === 'ALL') {
+                        filteredChannels = allChannels.filter(channel => 
+                            channel.name.toLowerCase().includes(searchTerm) || 
+                            channel.category.toLowerCase().includes(searchTerm)
+                        );
+                    } else {
+                        filteredChannels = allChannels.filter(channel => 
+                            channel.category === activeCategory && 
+                            (channel.name.toLowerCase().includes(searchTerm) || 
+                             channel.category.toLowerCase().includes(searchTerm))
+                        );
+                    }
+                    
+                    renderChannels();
+                });
+
+                // Play button
+                playBtn.addEventListener('click', () => {
+                    if (currentPlayingChannel) {
+                        playChannel(currentPlayingChannel);
+                    }
+                });
+
+                // Stop button
+                stopBtn.addEventListener('click', stopStream);
+
+                // Fullscreen button
+                fullscreenBtn.addEventListener('click', () => {
+                    if (videoPlayer.requestFullscreen) {
+                        videoPlayer.requestFullscreen();
+                    } else if (videoPlayer.webkitRequestFullscreen) {
+                        videoPlayer.webkitRequestFullscreen();
+                    } else if (videoPlayer.msRequestFullscreen) {
+                        videoPlayer.msRequestFullscreen();
+                    }
+                });
+
+                // Video player events
+                videoPlayer.addEventListener('waiting', () => {
+                    loadingIndicator.style.display = 'block';
+                    updateStreamStatus('Buffering...');
+                });
+
+                videoPlayer.addEventListener('playing', () => {
+                    loadingIndicator.style.display = 'none';
+                    updateStreamStatus('Playing');
+                });
+
+                videoPlayer.addEventListener('error', (e) => {
+                    loadingIndicator.style.display = 'none';
+                    updateStreamStatus('Error: ' + getVideoErrorText(videoPlayer.error));
+                    console.error('Video error:', videoPlayer.error);
+                });
+            }
+
+            // Play selected channel
+            function playChannel(channel) {
+                currentPlayingChannel = channel;
+                
+                // Update channel info
+                currentChannelName.textContent = channel.name;
+                currentChannelCategory.textContent = `${channel.category} • Channel ${channel.number}`;
+                
+                if (channel.logo) {
+                    currentChannelLogo.src = channel.logo;
+                    currentChannelLogo.style.display = 'block';
+                    defaultLogoIcon.style.display = 'none';
+                } else {
+                    currentChannelLogo.style.display = 'none';
+                    defaultLogoIcon.style.display = 'block';
+                }
+                
+                // Show video player and hide placeholder
+                document.querySelector('.player-placeholder').style.display = 'none';
+                videoPlayer.style.display = 'block';
+                playBtn.style.display = 'flex';
+                stopBtn.style.display = 'flex';
+                loadingIndicator.style.display = 'block';
+                
+                // Stop any existing stream
+                stopStream();
+                
+                // Load the new stream
+                loadStream(channel.url);
+                
+                // Scroll to top to show the player
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Load stream with HLS.js support
+            function loadStream(url) {
+                updateStreamStatus('Loading stream...');
+                
+                // Check if the URL is an HLS stream
+                if (url.includes('.m3u8')) {
+                    if (Hls.isSupported()) {
+                        // Use HLS.js for HLS streams
+                        hls = new Hls({
+                            debug: false,
+                            enableWorker: false, // Disable worker for better compatibility
+                        });
+                        
+                        hls.loadSource(url);
+                        hls.attachMedia(videoPlayer);
+                        
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            videoPlayer.play().catch(e => {
+                                console.error('Auto-play failed:', e);
+                                updateStreamStatus('Click play to start stream');
+                            });
+                        });
+                        
+                        hls.on(Hls.Events.ERROR, function(event, data) {
+                            console.error('HLS error:', data);
+                            if (data.fatal) {
+                                switch(data.type) {
+                                    case Hls.ErrorTypes.NETWORK_ERROR:
+                                        updateStreamStatus('Network error - trying to recover');
+                                        hls.startLoad();
+                                        break;
+                                    case Hls.ErrorTypes.MEDIA_ERROR:
+                                        updateStreamStatus('Media error - trying to recover');
+                                        hls.recoverMediaError();
+                                        break;
+                                    default:
+                                        updateStreamStatus('Fatal error - cannot recover');
+                                        stopStream();
+                                        break;
+                                }
+                            }
+                        });
+                    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Native HLS support (Safari)
+                        videoPlayer.src = url;
+                        videoPlayer.addEventListener('loadedmetadata', function() {
+                            videoPlayer.play().catch(e => {
+                                console.error('Auto-play failed:', e);
+                                updateStreamStatus('Click play to start stream');
+                            });
+                        });
+                    } else {
+                        updateStreamStatus('HLS not supported in this browser');
+                    }
+                } else {
+                    // For non-HLS streams
+                    videoPlayer.src = url;
+                    videoPlayer.load();
+                    videoPlayer.play().catch(e => {
+                        console.error('Auto-play failed:', e);
+                        updateStreamStatus('Click play to start stream');
+                    });
+                }
+            }
+
+            // Stop the current stream
+            function stopStream() {
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
+                
+                videoPlayer.pause();
+                videoPlayer.src = '';
+                videoPlayer.load();
+                
+                loadingIndicator.style.display = 'none';
+                streamStatus.style.display = 'none';
+            }
+
+            // Update stream status display
+            function updateStreamStatus(message) {
+                streamStatus.textContent = message;
+                streamStatus.style.display = 'block';
+            }
+
+            // Get readable error message from video error code
+            function getVideoErrorText(error) {
+                if (!error) return 'Unknown error';
+                
+                switch(error.code) {
+                    case error.MEDIA_ERR_ABORTED:
+                        return 'Video playback was aborted';
+                    case error.MEDIA_ERR_NETWORK:
+                        return 'A network error caused the video download to fail';
+                    case error.MEDIA_ERR_DECODE:
+                        return 'The video playback was aborted due to a corruption problem or because the video used features your browser did not support';
+                    case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        return 'The video format is not supported by your browser';
+                    default:
+                        return 'An unknown error occurred';
+                }
+            }
+
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+</html>
